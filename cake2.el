@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -296,7 +296,7 @@
           (define-key map "\C-cb" 'cake2-switch-to-file-history)
           (define-key map "\C-cM" 'cake2-open-models-dir)
           (define-key map "\C-cV" 'cake2-open-views-dir)
-          (define-key map "\C-u\C-cl" 'cake2-open-layouts-dir)
+          (define-key map "\C-c\C-l" 'cake2-open-layouts-dir)
           (define-key map "\C-cC" 'cake2-open-controllers-dir)
           (define-key map "\C-cB" 'cake2-open-behaviors-dir)
           (define-key map "\C-cH" 'cake2-open-helpers-dir)
@@ -307,7 +307,7 @@
           (define-key map "\C-cS" 'cake2-open-css-dir)
           (define-key map "\C-cT" 'cake2-open-tests-dir)
           (define-key map "\C-c\C-g" 'cake2-open-config-dir)
-          (define-key map "\C-c\C-l" 'cake2-tail-log)
+          (define-key map "\C-c\C-t" 'cake2-tail-log)
           ;; anything-functions
           (define-key map "\C-cl" 'anything-c-cake2-anything-only-source-cake2)
           (define-key map "\C-co" 'anything-c-cake2-anything-only-function)
