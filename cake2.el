@@ -565,14 +565,14 @@
   "Switch to model testcase."
   (interactive)
   (if (cake2-is-file)
-      (cake2-switch-to-file (concat cake2-app-path "Test/Case/Model/" cake2-singular-name ".test.php"))
+      (cake2-switch-to-file (concat cake2-app-path "Test/Case/Model/" cake2-singular-name "Test.php"))
     (message "Can't switch to model testcase.")))
 
 (defun cake2-switch-to-controller-testcase ()
   "Switch to contoroller testcase."
   (interactive)
   (if (cake2-is-file)
-      (cake2-switch-to-file (concat cake2-app-path "Test/Case/Controller/" cake2-plural-name "Controller.test.php"))
+      (cake2-switch-to-file (concat cake2-app-path "Test/Case/Controller/" cake2-plural-name "ControllerTest.php"))
     (message "Can't switch to contoroller testcase.")))
 
 (defun cake2-switch-to-fixture ()
