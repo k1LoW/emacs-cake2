@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -884,7 +884,15 @@
 (defun cake2-open-tests-dir ()
   "Open tests directory."
   (interactive)
-  (cake2-open-dir (list "Test/Case/" "Test/Fixture/" "Tests/Group/") t))
+  (let ((tests nil)
+        (plugin-list (cake-find-plugin-dir)))
+    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Tests/Group/") nil))) plugin-list) tests))
+    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Fixture/") nil))) plugin-list) tests))
+    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Case/") nil))) plugin-list) tests))
+    (push "Tests/Group/" tests)
+    (push "Test/Fixture/" tests)
+    (push "Test/Case/" tests)
+    (cake2-open-dir tests t)))
 
 (defun cake2-find-themed-dir ()
   "Find themed directory. like app/View/Themed/m"
