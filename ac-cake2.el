@@ -58,7 +58,7 @@
         (while (not (eobp))
           (if (not (re-search-forward ".+\\/\\(.+\\)\.php:.*function *\\([^ ]+\\) *(.*).*" nil t))
               (goto-char (point-max))
-            (setq class-name (cake2-camelize (match-string 1)))
+            (setq class-name (cake2-camelize (cake2-snake (match-string 1))))
             (setq function-name (match-string 2))
             (delete-region (point) (save-excursion (end-of-line) (point)))
             (push (concat class-name "->" function-name) ac-cake2-index)
