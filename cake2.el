@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.2
+;; Version: 1.0.3
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -356,6 +356,7 @@
   (cake2-set-app-path)
   (if (not (string-match cake2-controller-regexp (buffer-file-name)))
       nil
+    (string-match cake2-controller-regexp (buffer-file-name))
     (setq cake2-plural-name (match-string 1 (buffer-file-name)))
     (save-excursion
       (if
@@ -496,6 +497,7 @@
 (defun cake2-switch-to-model ()
   "Switch to model."
   (interactive)
+  (cake2-is-file)
   (if (cake2-is-file)
       (cake2-switch-to-file (concat cake2-app-path "Model/" cake2-camelize-name ".php"))
     (message "Can't find model name.")))
@@ -589,7 +591,7 @@
   "Switch to fixture."
   (interactive)
   (if (cake2-is-file)
-      (cake2-switch-to-file (concat cake2-app-path "tests/fixtures/" cake2-singular-name "_fixture.php"))
+      (cake2-switch-to-file (concat cake2-app-path "Test/Fixture/" cake2-singular-name "Fixture.php"))
     (message "Can't switch to fixture.")))
 
 (defun cake2-switch-to-file (file-path)
@@ -1108,9 +1110,12 @@
 (defun cake2-camelize (str)
   "Camelize snake_case str"
   (let ((camelize-str str) (case-fold-search nil))
+    (setq camelize-str (replace-regexp-in-string
+     "_" " "
+     camelize-str))
     (setq camelize-str (capitalize (downcase camelize-str)))
     (replace-regexp-in-string
-     "_" ""
+     " " ""
      camelize-str)))
 ;;(cake2-camelize "cake2_camelize")
 
