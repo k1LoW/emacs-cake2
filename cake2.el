@@ -1,7 +1,7 @@
 ;;;cake2.el ---  CakePHP2 Minor Mode
 ;; -*- Mode: Emacs-Lisp -*-
 
-;; Copyright (C) 2011 by 101000code/101000LAB
+;; Copyright (C) 2011-2012 by 101000code/101000LAB
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.3
+;; Version: 1.0.4
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -82,7 +82,7 @@
 ;;  `cake2-open-views-dir'
 ;;    Open views directory.
 ;;  `cake2-open-controllers-dir'
-;;    Open contorollers directory.
+;;    Open controllers directory.
 ;;  `cake2-open-behaviors-dir'
 ;;    Open behaviors directory.
 ;;  `cake2-open-helpers-dir'
@@ -705,13 +705,13 @@
       (cond
        ;;cake2-switch-to-javascript
        ((or (string-match "$javascript->link( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))
-            (string-match "$this->Html->script( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))) (cake2-switch-to-javascript)) ;;1.3x
+            (string-match "$this->Html->script( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))) (cake2-switch-to-javascript))
        ;;cake2-switch-to-element
        ((or (string-match "renderElement( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*)" (cake2-get-current-line))
             (string-match "element(['\"]\\( *[-a-zA-Z0-9_/\.]+\\)['\"].*)" (cake2-get-current-line))) (cake2-switch-to-element))
        ;;cake2-switch-to-css
        ((or (string-match "$html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))
-            (string-match "$this->html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))) (cake2-switch-to-css)) ;;1.3x
+            (string-match "$this->Html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2-get-current-line))) (cake2-switch-to-css))
        ;;cake2-switch-to-controller
        ((cake2-is-view-file) (cake2-switch-to-controller))
        ;;cake2-switch-to-view
@@ -812,7 +812,7 @@
       (cake2-open-dir plugin-list t))))
 
 (defun cake2-open-controllers-dir ()
-  "Open contorollers directory."
+  "Open controllers directory."
   (interactive)
   (let ((plugin-list (cake2-find-plugin-dir))
         (controller-list (cake2-find-controller-dir)))
@@ -970,9 +970,7 @@
                     (mapcar (function (lambda (c)
                                         (if (string-match (concat "\\.js$") c)
                                             (setq c (replace-match "" nil nil c)))
-                                        (if (string-match "1\.3" cake2-core-version)
-                                            (concat "$this->Html->script('" c "');")
-                                          (concat "$javascript->link('" c "');"))))
+                                        (concat "$this->Html->script('" c "');")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
                                                        (file-directory-p (concat cake2-app-path "webroot/js/" x))))
                                        (cake2-directory-files "webroot/js/" t)))))
@@ -987,9 +985,7 @@
                     (mapcar (function (lambda (c)
                                         (if (string-match (concat "\\.css$") c)
                                             (setq c (replace-match "" nil nil c)))
-                                        (if (string-match "1\.3" cake2-core-version)
-                                            (concat "$this->Html->css('" c "');")
-                                          (concat "$html->css('" c "');"))))
+                                        (concat "$this->Html->css('" c "');")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
                                                        (file-directory-p (concat cake2-app-path "webroot/css/" x))))
                                        (cake2-directory-files "webroot/css/" t)))))
@@ -1499,6 +1495,37 @@
     (anything (list anything-c-source-cake2-po
                     anything-c-source-cake2-po-not-found)
               initial-pattern "Find Msgid And Msgstr: " nil)))
+
+;; Tests
+(dont-compile
+  (when (fboundp 'expectations)
+    (expectations
+      (desc "init")
+      (expect t
+        (setq cake2-test-dir (expand-file-name (concat default-directory "t/")))
+        t)
+      (expect t
+        (global-cake2 t)
+        t)
+      (desc "MVC switch test")
+      (expect t
+        (find-file (concat cake2-test-dir "app/Controller/PostsController.php"))
+        (cake2-maybe))
+      (expect (concat cake2-test-dir "app/Model/Post.php")
+        (cake2-switch-to-model)
+        (expand-file-name (buffer-file-name)))
+      (expect (concat cake2-test-dir "app/Controller/PostsController.php")
+        (cake2-switch-to-controller)
+        (expand-file-name (buffer-file-name)))
+      (expect (concat cake2-test-dir "app/View/Posts/add.ctp")
+        (goto-char (point-min))
+        (re-search-forward "function add()" nil t)
+        (cake2-switch-to-view)
+        (expand-file-name (buffer-file-name)))
+      (expect (concat cake2-test-dir "app/Controller/PostsController.php")
+        (cake2-switch-to-controller)
+        (expand-file-name (buffer-file-name)))
+      )))
 
 ;; mode provide
 (provide 'cake2)
