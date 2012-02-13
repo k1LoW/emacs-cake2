@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.4
+;; Version: 1.0.5
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -483,7 +483,7 @@
   (setq cake2-model-regexp (concat cake2-app-path "Model/\\([^/]+\\)\.php"))
   (setq cake2-view-regexp (concat cake2-app-path "View/\\([^/]+\\)/\\([^/]+/\\)?\\([^/.]+\\)\\.\\([a-z]+\\)$"))
   (setq cake2-themed-regexp (concat cake2-app-path "View/Themed/\\([^/]+\\)/\\([^/]+\\)/\\([^/]+/\\)?\\([^/.]+\\)\\.\\([a-z]+\\)$"))
-  (setq cake2-controller-regexp (concat cake2-app-path "Controller/\\([^/]+\\)Controller\.php$"))
+  (setq cake2-controller-regexp (concat cake2-app-path ".+/\\([^/]+\\)Controller\.php$"))
   (setq cake2-behavior-regexp (concat cake2-app-path "Model/Behavior/\\([^/]+\\)\.php$"))
   (setq cake2-helper-regexp (concat cake2-app-path "View/Helper/\\([^/]+\\)\.php$"))
   (setq cake2-component-regexp (concat cake2-app-path "Controller/Component/\\([^/]+\\)\.php$"))
@@ -1091,7 +1091,7 @@
           (unless (not (string-match (nth 0 rule) str))
             (setq result (replace-match (nth 1 rule) nil nil str))
             (return result)))))
-;;(cake2-singularize "cases")
+;;(cake2-singularize "App")
 
 (defun cake2-pluralize (str)
   "Pluralize str"
@@ -1107,8 +1107,8 @@
   "Camelize snake_case str"
   (let ((camelize-str str) (case-fold-search nil))
     (setq camelize-str (replace-regexp-in-string
-     "_" " "
-     camelize-str))
+                        "_" " "
+                        camelize-str))
     (setq camelize-str (capitalize (downcase camelize-str)))
     (replace-regexp-in-string
      " " ""
@@ -1152,30 +1152,30 @@
 
 (defvar anything-c-cake2-po-file-buffer-name "*Cake2 Po*")
 
+(defun cake2-build-source-cake2()
+  "Build for anything-c-source-cake2"
+  (unless
+      (not (and (cake2-set-app-path) (executable-find "find") (executable-find "grep")))
+    (call-process-shell-command
+     (concat "find " cake2-app-path "Controller -type f -name '*Controller.php' | xargs grep '[^_]function' --with-filename")
+     nil (current-buffer))
+    (goto-char (point-min))
+    (while (re-search-forward (concat cake2-app-path "Controller\\/\\(.+\\)Controller\.php:.*function *\\([^ ]+\\) *(.*).*$") nil t)
+      (replace-match (concat (match-string 1) " / " (match-string 2))))
+    (goto-char (point-max))
+    (call-process-shell-command
+     (concat "find " cake2-app-path "Lib -type f -name '*Controller.php' | xargs grep '[^_]function' --with-filename")
+     nil (current-buffer))
+    (goto-char (point-min))
+    (while (re-search-forward (concat cake2-app-path "Lib\\/\\(.+\\)Controller\.php:.*function *\\([^ ]+\\) *(.*).*$") nil t)
+      (replace-match (concat "Lib/" (match-string 1) " / " (match-string 2))))))
+
 (defvar anything-c-source-cake2
   '((name . "Cake2 Switch")
     (init
      . (lambda ()
-         (if
-             (and (cake2-set-app-path) (executable-find "grep"))
-             (with-current-buffer (anything-candidate-buffer 'local)
-               (call-process-shell-command
-                (concat "grep '[^_]function' "
-                        cake2-app-path
-                        "Controller/*Controller.php --with-filename")
-                nil (current-buffer))
-               (call-process-shell-command
-                (concat "grep '[^_]function' "
-                        cake2-app-path
-                        "Lib/*Controller.php --with-filename")
-                nil (current-buffer))
-               (goto-char (point-min))
-               (while (re-search-forward ".+\\/\\([^\\/]+\\)Controller\.php:.*function *\\([^ ]+\\) *(.*).*$" nil t)
-                 (replace-match (concat (match-string 1) " / " (match-string 2))))
-               )
-           (with-current-buffer (anything-candidate-buffer 'local)
-             (call-process-shell-command nil nil (current-buffer)))
-           )))
+         (with-current-buffer (anything-candidate-buffer 'local)
+           (cake2-build-source-cake2))))
     (candidates-in-buffer)
     (display-to-real . anything-c-cake2-set-names)
     (action
@@ -1193,6 +1193,7 @@
     (setq cake2-plural-name (match-string 1 candidate))
     (setq cake2-action-name (match-string 2 candidate))
     (setq cake2-singular-name (cake2-singularize cake2-plural-name))
+    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
     (setq cake2-lower-camelized-action-name cake2-action-name)
     (setq cake2-snake-action-name (cake2-snake cake2-action-name))))
 
@@ -1507,7 +1508,15 @@
       (expect t
         (global-cake2 t)
         t)
+      (desc "Inflector test")
+      (expect "Lib/Admin/App"
+          (cake2-singularize "Lib/Admin/App"))
+      (expect "Lib/Admin/Post"
+          (cake2-singularize "Lib/Admin/Posts"))
       (desc "MVC switch test")
+      (expect t
+        (find-file (concat cake2-test-dir "app/Lib/Controller/AdminAppController.php"))
+        (cake2-maybe))
       (expect t
         (find-file (concat cake2-test-dir "app/Controller/PostsController.php"))
         (cake2-maybe))
@@ -1525,6 +1534,40 @@
       (expect (concat cake2-test-dir "app/Controller/PostsController.php")
         (cake2-switch-to-controller)
         (expand-file-name (buffer-file-name)))
+      (expect t
+        (stringp (executable-find "grep")))
+      (expect t
+        (with-temp-buffer
+          (cake2-build-source-cake2)
+          (integerp (string-match "Comments / index" (buffer-string)))))
+      (expect t
+        (with-temp-buffer
+          (cake2-build-source-cake2)
+          (integerp (string-match "Posts / index" (buffer-string)))))
+      (expect t
+        (with-temp-buffer
+          (cake2-build-source-cake2)
+          (integerp (string-match "App / beforeFilter" (buffer-string)))))
+      (expect t
+        (with-temp-buffer
+          (cake2-build-source-cake2)
+          (integerp (string-match "Admin/AdminPosts / index" (buffer-string)))))
+      (expect t
+        (with-temp-buffer
+          (cake2-build-source-cake2)
+          (integerp (string-match "Lib/Controller/Admin/AdminApp / beforeFilter" (buffer-string)))))
+      (expect "Posts"
+          (anything-c-cake2-set-names "Posts / add")
+          cake2-plural-name)
+      (expect "Admin/AdminPosts"
+          (anything-c-cake2-set-names "Admin/AdminPosts / index")
+          cake2-plural-name)
+      (expect "index"
+          (anything-c-cake2-set-names "Admin/AdminPosts / index")
+          cake2-action-name)
+      (expect "Admin/AdminPost"
+          (anything-c-cake2-set-names "Admin/AdminPosts / index")
+          cake2-singular-name)
       )))
 
 ;; mode provide
