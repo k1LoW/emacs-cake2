@@ -359,12 +359,16 @@
     (string-match cake2-controller-regexp (buffer-file-name))
     (setq cake2-plural-name (match-string 1 (buffer-file-name)))
     (save-excursion
-      (if
-          (not (re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
-          (re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
-    (setq cake2-action-name (match-string 1))
-    (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
-    (setq cake2-snake-action-name (cake2-snake cake2-action-name))
+      (if (cond
+	   ((re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
+	   ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
+	  (progn
+	    (setq cake2-action-name (match-string 1))
+	    (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
+	    (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
+	(setq cake2-action-name nil)
+	(setq cake2-lower-camelized-action-name nil)
+	(setq cake2-snake-action-name nil)))
     (setq cake2-singular-name (cake2-singularize cake2-plural-name))
     (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
     (setq cake2-current-file-type 'controller)))
@@ -506,7 +510,8 @@
   "Switch to view."
   (interactive)
   (let ((view-files nil))
-    (if (cake2-is-file)
+    (if (and (cake2-is-file)
+	     cake2-action-name)
         (progn
           (if (cake2-is-model-file)
               (setq cake2-plural-name (cake2-pluralize cake2-singular-name)))
