@@ -360,15 +360,15 @@
     (setq cake2-plural-name (match-string 1 (buffer-file-name)))
     (save-excursion
       (if (cond
-	   ((re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
-	   ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
-	  (progn
-	    (setq cake2-action-name (match-string 1))
-	    (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
-	    (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
-	(setq cake2-action-name nil)
-	(setq cake2-lower-camelized-action-name nil)
-	(setq cake2-snake-action-name nil)))
+           ((re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
+           ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
+          (progn
+            (setq cake2-action-name (match-string 1))
+            (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
+            (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
+        (setq cake2-action-name nil)
+        (setq cake2-lower-camelized-action-name nil)
+        (setq cake2-snake-action-name nil)))
     (setq cake2-singular-name (cake2-singularize cake2-plural-name))
     (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
     (setq cake2-current-file-type 'controller)))
@@ -511,7 +511,7 @@
   (interactive)
   (let ((view-files nil))
     (if (and (cake2-is-file)
-	     cake2-action-name)
+             cake2-action-name)
         (progn
           (if (cake2-is-model-file)
               (setq cake2-plural-name (cake2-pluralize cake2-singular-name)))
@@ -1515,9 +1515,9 @@
         t)
       (desc "Inflector test")
       (expect "Lib/Admin/App"
-          (cake2-singularize "Lib/Admin/App"))
+        (cake2-singularize "Lib/Admin/App"))
       (expect "Lib/Admin/Post"
-          (cake2-singularize "Lib/Admin/Posts"))
+        (cake2-singularize "Lib/Admin/Posts"))
       (desc "MVC switch test")
       (expect t
         (find-file (concat cake2-test-dir "app/Lib/Controller/AdminAppController.php"))
@@ -1562,17 +1562,24 @@
           (cake2-build-source-cake2)
           (integerp (string-match "Lib/Controller/Admin/AdminApp / beforeFilter" (buffer-string)))))
       (expect "Posts"
-          (anything-c-cake2-set-names "Posts / add")
-          cake2-plural-name)
+        (anything-c-cake2-set-names "Posts / add")
+        cake2-plural-name)
       (expect "Admin/AdminPosts"
-          (anything-c-cake2-set-names "Admin/AdminPosts / index")
-          cake2-plural-name)
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
+        cake2-plural-name)
       (expect "index"
-          (anything-c-cake2-set-names "Admin/AdminPosts / index")
-          cake2-action-name)
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
+        cake2-action-name)
       (expect "Admin/AdminPost"
-          (anything-c-cake2-set-names "Admin/AdminPosts / index")
-          cake2-singular-name)
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
+        cake2-singular-name)
+      (expect t
+        (find-file (concat cake2-test-dir "app/Controller/NoActionController.php"))
+        (cake2-maybe))
+      (expect (concat cake2-test-dir "app/Controller/NoActionController.php")
+        (goto-char (point-max))
+        (cake2-switch-to-view)
+        (expand-file-name (buffer-file-name)))
       )))
 
 ;; mode provide
