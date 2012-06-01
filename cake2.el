@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.5
+;; Version: 1.0.6
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -739,15 +739,15 @@
   (interactive)
   (historyf-back '(cake2)))
 
-(defun cake2-open-dir (dir &optional recursive)
+(defun cake2-open-dir (dir &optional recursive ignore)
   "Open directory."
   (interactive)
   (if (cake2-set-app-path)
       (anything-other-buffer
-       (cake2-create-open-dir-anything-sources dir recursive) nil)
+       (cake2-create-open-dir-anything-sources dir recursive ignore) nil)
     (message "Can't set app path.")))
 
-(defun cake2-create-open-dir-anything-sources (dir &optional recursive)
+(defun cake2-create-open-dir-anything-sources (dir &optional recursive ignore)
   "Careate 'Open dir' anything-sources"
   (let (sources)
     (unless (listp dir)
@@ -758,7 +758,7 @@
                 (unless (not (file-directory-p (concat cake2-app-path d)))
                   (push
                    `((name . ,(concat "Open directory: " d))
-                     (candidates . ,(cake2-directory-files d recursive))
+                     (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2-directory-files d recursive)))
                      (display-to-real . (lambda (candidate)
                                           (concat ,cake2-app-path ,d candidate)))
                      (type . file))
@@ -801,7 +801,7 @@
   (let ((plugin-list (cake2-find-plugin-dir)))
     (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Model/") nil))) plugin-list))
     (push "Model/" plugin-list)
-    (cake2-open-dir plugin-list)))
+    (cake2-open-dir plugin-list t "Behavior\\|Datasource")))
 
 (defun cake2-open-views-dir ()
   "Open views directory."
@@ -814,7 +814,7 @@
           (cake2-open-dir themed-list))
       (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/") nil))) plugin-list))
       (push "View/" plugin-list)
-      (cake2-open-dir plugin-list t))))
+      (cake2-open-dir plugin-list t "Helper"))))
 
 (defun cake2-open-controllers-dir ()
   "Open controllers directory."
@@ -824,7 +824,7 @@
     (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Controller/") nil))) plugin-list))
     (setq controller-list (append controller-list plugin-list))
     (push "Controller/" controller-list)
-    (cake2-open-dir (remove-if (lambda (x) (string-match "Component" x)) controller-list))))
+    (cake2-open-dir (remove-if (lambda (x) (string-match "Component" x)) controller-list) t "Component")))
 
 (defun cake2-open-behaviors-dir ()
   "Open behaviors directory."
