@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.6
+;; Version: 1.0.7
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -902,7 +902,7 @@
   "Open tests directory."
   (interactive)
   (let ((tests nil)
-        (plugin-list (cake-find-plugin-dir)))
+        (plugin-list (cake2-find-plugin-dir)))
     (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Tests/Group/") nil))) plugin-list) tests))
     (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Fixture/") nil))) plugin-list) tests))
     (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Case/") nil))) plugin-list) tests))
