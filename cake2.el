@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.7
+;; Version: 1.0.9
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 
@@ -81,6 +81,8 @@
 ;;    Open models directory.
 ;;  `cake2-open-views-dir'
 ;;    Open views directory.
+;;  `cake2-open-all-views-dir'
+;;    Open all views directory.
 ;;  `cake2-open-controllers-dir'
 ;;    Open controllers directory.
 ;;  `cake2-open-behaviors-dir'
@@ -299,6 +301,7 @@
           (define-key map "\C-cb" 'cake2-switch-to-file-history)
           (define-key map "\C-cM" 'cake2-open-models-dir)
           (define-key map "\C-cV" 'cake2-open-views-dir)
+          (define-key map "\C-u\C-cV" 'cake2-open-all-views-dir)
           (define-key map "\C-c\C-l" 'cake2-open-layouts-dir)
           (define-key map "\C-cC" 'cake2-open-controllers-dir)
           (define-key map "\C-cB" 'cake2-open-behaviors-dir)
@@ -807,14 +810,19 @@
   "Open views directory."
   (interactive)
   (let ((themed-list (cake2-find-themed-dir)) (plugin-list (cake2-find-plugin-dir)))
-    (if (or (cake2-is-model-file) (cake2-is-controller-file) (cake2-is-view-file))
-        (progn
-          (setq themed-list (mapcar (function (lambda (c) (if c (concat c cake2-plural-name "/") nil))) themed-list))
-          (push (concat "View/" cake2-plural-name "/") themed-list)
-          (cake2-open-dir themed-list))
-      (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/") nil))) plugin-list))
-      (push "View/" plugin-list)
-      (cake2-open-dir plugin-list t "Helper"))))
+    (if (not (or (cake2-is-model-file) (cake2-is-controller-file) (cake2-is-view-file)))
+        (cake2-open-all-views-dir)
+      (setq themed-list (mapcar (function (lambda (c) (if c (concat c cake2-plural-name "/") nil))) themed-list))
+      (push (concat "View/" cake2-plural-name "/") themed-list)
+      (cake2-open-dir themed-list))))
+
+(defun cake2-open-all-views-dir ()
+  "Open all views directory."
+  (interactive)
+  (let ((themed-list (cake2-find-themed-dir)) (plugin-list (cake2-find-plugin-dir)))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/") nil))) plugin-list))
+    (push "View/" plugin-list)
+    (cake2-open-dir plugin-list t "Helper")))
 
 (defun cake2-open-controllers-dir ()
   "Open controllers directory."
@@ -874,13 +882,29 @@
     (push (concat "View/Layouts/") themed-list)
     (cake2-open-dir themed-list t)))
 
+(defun cake2-open-layouts-dir ()
+  "Open layouts directory."
+  (interactive)
+  (let ((layouts)
+        (plugin-list (cake2-find-plugin-dir))
+        (themed-list (cake2-find-themed-dir)))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/Layouts/") nil))) plugin-list))
+    (setq themed-list (mapcar (function (lambda (c) (if c (concat c "Layouts/") nil))) themed-list))
+    (setq layouts (append plugin-list themed-list))
+    (push (concat "View/Layouts/") layouts)
+    (cake2-open-dir layouts t)))
+
 (defun cake2-open-elements-dir ()
   "Open elements directory."
   (interactive)
-  (let ((themed-list (cake2-find-themed-dir)))
+  (let ((elements)
+        (plugin-list (cake2-find-plugin-dir))
+        (themed-list (cake2-find-themed-dir)))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/Elements/") nil))) plugin-list))
     (setq themed-list (mapcar (function (lambda (c) (if c (concat c "Elements/") nil))) themed-list))
-    (push (concat "View/Elements/") themed-list)
-    (cake2-open-dir themed-list t)))
+    (setq elements (append plugin-list themed-list))
+    (push (concat "View/Elements/") elements)
+    (cake2-open-dir elements t)))
 
 (defun cake2-open-js-dir ()
   "Open JavaScript directory."
@@ -1193,14 +1217,13 @@
 
 (defun anything-c-cake2-set-names (candidate)
   "Set names by display-to-real"
-  (progn
-    (string-match "\\(.+\\) / \\(.+\\)" candidate)
-    (setq cake2-plural-name (match-string 1 candidate))
-    (setq cake2-action-name (match-string 2 candidate))
-    (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
-    (setq cake2-lower-camelized-action-name cake2-action-name)
-    (setq cake2-snake-action-name (cake2-snake cake2-action-name))))
+  (string-match "\\(.+\\) / \\(.+\\)" candidate)
+  (setq cake2-plural-name (match-string 1 candidate))
+  (setq cake2-action-name (match-string 2 candidate))
+  (setq cake2-singular-name (cake2-singularize cake2-plural-name))
+  (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+  (setq cake2-lower-camelized-action-name cake2-action-name)
+  (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
 
 (defun anything-c-cake2-switch-to-view ()
   "Switch to view."
@@ -1382,12 +1405,12 @@
 
 (defun anything-c-cake2-set-names2 (candidate)
   "Set names by display-to-real"
-  (progn
-    (string-match "\\(.+\\)->\\(.+\\)" candidate)
-    (setq cake2-camelized-singular-name (match-string 1 candidate))
-    (setq cake2-camelize-name cake2-camelized-singular-name)
-    (setq cake2-candidate-function-name (match-string 2 candidate))
-    (setq cake2-singular-name (cake2-snake cake2-camelized-singular-name))))
+  (string-match "\\(.+\\)->\\(.+\\)" candidate)
+  (setq cake2-camelized-singular-name (match-string 1 candidate))
+  (setq cake2-camelize-name cake2-camelized-singular-name)
+  (setq cake2-candidate-function-name (match-string 2 candidate))
+  (setq cake2-singular-name (cake2-snake cake2-camelized-singular-name))
+  candidate)
 
 (defun anything-c-cake2-create-po-file-buffer ()
   "Create buffer from po file."
