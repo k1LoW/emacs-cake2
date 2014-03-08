@@ -1,7 +1,7 @@
 ;;;cake2.el ---  CakePHP2 Minor Mode
 ;; -*- Mode: Emacs-Lisp -*-
 
-;; Copyright (C) 2011-2012 by 101000code/101000LAB
+;; Copyright (C) 2011-2014 by 101000code/101000LAB
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.0.9
+;; Version: 1.1.0
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
+;; Package-Requires: ((cake-infrector "1.0.1"))
 
 ;;; Install
 ;; Put this file into load-path'ed directory, and byte compile it if
