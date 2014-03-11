@@ -17,10 +17,10 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.1.0
+;; Version: 1.1.1
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
-;; Package-Requires: ((cake-infrector "1.0.1") (historyf "0.0.8") (anything "1.3.9"))
+;; Package-Requires: ((cake-infrector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
 
 ;;; Install
 ;; Put this file into load-path'ed directory, and byte compile it if
@@ -112,10 +112,6 @@
 ;;    Insert CakePHP2 code.
 ;;  `cake2-tail-log'
 ;;    Show log by "tail".
-;;  `cake2-singularize'
-;;    Singularize str
-;;  `cake2-pluralize'
-;;    Pluralize str
 ;;  `anything-c-cake2-anything-only-source-cake2'
 ;;    anything only anything-c-source-cake2 and anything-c-source-cake2-model-function.
 ;;  `anything-c-cake2-anything-only-function'
@@ -220,10 +216,10 @@
 (defvar cake2-action-name "index"
   "CakePHP2 action name.")
 
-(defvar cake2-lower-camelized-action-name "index"
+(defvar cake-lower-camelized-action-name "index"
   "CakePHP2 lower camelized action name.")
 
-(defvar cake2-snake-action-name "index"
+(defvar cake-snake-action-name "index"
   "CakePHP2 snake_case action name.")
 
 (defvar cake2-view-extension "ctp"
@@ -235,7 +231,7 @@
 (defvar cake2-plural-name nil
   "CakePHP2 current plural name.")
 
-(defvar cake2-camelize-name nil
+(defvar cake-camelize-name nil
   "CakePHP2 current camelize name.")
 
 (defvar cake2-themed-name nil
@@ -327,8 +323,8 @@
   (if (not (string-match cake2-model-regexp (buffer-file-name)))
       nil
     (setq cake2-singular-name (match-string 1 (buffer-file-name)))
-    (setq cake2-plural-name (cake2-pluralize cake2-singular-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+    (setq cake2-plural-name (cake-pluralize cake2-singular-name))
+    (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
     (setq cake2-current-file-type 'model)))
 
 (defun cake2-is-view-file ()
@@ -341,18 +337,18 @@
         (setq cake2-plural-name (match-string 2 (buffer-file-name)))
         (setq cake2-action-name (match-string 4 (buffer-file-name)))
         (setq cake2-view-extension (match-string 5 (buffer-file-name)))
-        (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
-        (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-        (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+        (setq cake-lower-camelized-action-name (cake-lower-camelize cake2-action-name))
+        (setq cake2-singular-name (cake-singularize cake2-plural-name))
+        (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
         (setq cake2-current-file-type 'view))
     (if (not (string-match cake2-view-regexp (buffer-file-name)))
         nil
       (setq cake2-plural-name (match-string 1 (buffer-file-name)))
       (setq cake2-action-name (match-string 3 (buffer-file-name)))
       (setq cake2-view-extension (match-string 4 (buffer-file-name)))
-      (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
-      (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-      (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+      (setq cake-lower-camelized-action-name (cake-lower-camelize cake2-action-name))
+      (setq cake2-singular-name (cake-singularize cake2-plural-name))
+      (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
       (setq cake2-current-file-type 'view))))
 
 (defun cake2-is-controller-file ()
@@ -368,13 +364,13 @@
            ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
           (progn
             (setq cake2-action-name (match-string 1))
-            (setq cake2-lower-camelized-action-name (cake2-lower-camelize cake2-action-name))
-            (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
+            (setq cake-lower-camelized-action-name (cake-lower-camelize cake2-action-name))
+            (setq cake-snake-action-name (cake-snake cake2-action-name)))
         (setq cake2-action-name nil)
-        (setq cake2-lower-camelized-action-name nil)
-        (setq cake2-snake-action-name nil)))
-    (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+        (setq cake-lower-camelized-action-name nil)
+        (setq cake-snake-action-name nil)))
+    (setq cake2-singular-name (cake-singularize cake2-plural-name))
+    (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
     (setq cake2-current-file-type 'controller)))
 
 (defun cake2-is-behavior-file ()
@@ -404,8 +400,8 @@
   (if (not (string-match cake2-model-testcase-regexp (buffer-file-name)))
       nil
     (setq cake2-singular-name (match-string 1 (buffer-file-name)))
-    (setq cake2-plural-name (cake2-pluralize cake2-singular-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+    (setq cake2-plural-name (cake-pluralize cake2-singular-name))
+    (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
     (setq cake2-current-file-type 'model-testcase)))
 
 (defun cake2-is-controller-testcase-file ()
@@ -414,8 +410,8 @@
   (if (not (string-match cake2-controller-testcase-regexp (buffer-file-name)))
       nil
     (setq cake2-plural-name (match-string 1 (buffer-file-name)))
-    (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+    (setq cake2-singular-name (cake-singularize cake2-plural-name))
+    (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
     (setq cake2-current-file-type 'controller-testcase)))
 
 (defun cake2-is-fixture-file ()
@@ -424,8 +420,8 @@
   (if (not (string-match cake2-fixture-regexp (buffer-file-name)))
       nil
     (setq cake2-singular-name (match-string 1 (buffer-file-name)))
-    (setq cake2-plural-name (cake2-pluralize cake2-singular-name))
-    (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
+    (setq cake2-plural-name (cake-pluralize cake2-singular-name))
+    (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
     (setq cake2-current-file-type 'fixture)))
 
 (defun cake2-is-javascript-file ()
@@ -507,7 +503,7 @@
   (interactive)
   (cake2-is-file)
   (if (cake2-is-file)
-      (cake2-switch-to-file (concat cake2-app-path "Model/" cake2-camelize-name ".php"))
+      (cake2-switch-to-file (concat cake2-app-path "Model/" cake-camelize-name ".php"))
     (message "Can't find model name.")))
 
 (defun cake2-switch-to-view ()
@@ -518,7 +514,7 @@
              cake2-action-name)
         (progn
           (if (cake2-is-model-file)
-              (setq cake2-plural-name (cake2-pluralize cake2-singular-name)))
+              (setq cake2-plural-name (cake-pluralize cake2-singular-name)))
           (setq view-files (cake2-set-view-list))
           (if view-files
               (cond
@@ -549,12 +545,12 @@
     (unless (not (file-directory-p dir))
       (setq view-dir (remove-if-not (lambda (x) (file-directory-p (concat cake2-app-path "View/" cake2-plural-name "/" x))) (directory-files dir)))
       (setq view-dir (remove-if (lambda (x) (equal x "..")) view-dir))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2-app-path "View/" cake2-plural-name "/" x "/" cake2-snake-action-name "." cake2-view-extension))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2-snake-action-name "." cake2-view-extension) y)) view-files)
-                                       (push (concat x "/" cake2-snake-action-name "." cake2-view-extension) view-files))))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2-app-path "View/" cake2-plural-name "/" x "/" cake2-snake-action-name ".ctp"))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2-snake-action-name ".ctp") y)) view-files)
-                                       (push (concat x "/" cake2-snake-action-name ".ctp") view-files))))
+      (loop for x in view-dir do (if (file-exists-p (concat cake2-app-path "View/" cake2-plural-name "/" x "/" cake-snake-action-name "." cake2-view-extension))
+                                     (unless (some (lambda (y) (equal (concat x "/" cake-snake-action-name "." cake2-view-extension) y)) view-files)
+                                       (push (concat x "/" cake-snake-action-name "." cake2-view-extension) view-files))))
+      (loop for x in view-dir do (if (file-exists-p (concat cake2-app-path "View/" cake2-plural-name "/" x "/" cake-snake-action-name ".ctp"))
+                                     (unless (some (lambda (y) (equal (concat x "/" cake-snake-action-name ".ctp") y)) view-files)
+                                       (push (concat x "/" cake-snake-action-name ".ctp") view-files))))
       (loop for x in view-dir do (if (file-exists-p (concat cake2-app-path "View/" cake2-plural-name "/" x "/" cake2-action-name "." cake2-view-extension))
                                      (unless (some (lambda (y) (equal (concat x "/" cake2-action-name "." cake2-view-extension) y)) view-files)
                                        (push (concat x "/" cake2-action-name "." cake2-view-extension) view-files))))
@@ -572,7 +568,7 @@
             (progn
               (find-file (concat cake2-app-path "Controller/" cake2-plural-name "Controller.php"))
               (goto-char (point-min))
-              (if (not (re-search-forward (concat "function[ \t]*" cake2-lower-camelized-action-name "[ \t]*\(") nil t))
+              (if (not (re-search-forward (concat "function[ \t]*" cake-lower-camelized-action-name "[ \t]*\(") nil t))
                   (progn
                     (goto-char (point-min))
                     (re-search-forward (concat "function[ \t]*" cake2-action-name "[ \t]*\(") nil t)))
@@ -1113,65 +1109,6 @@
             (switch-to-buffer logbuffer))
         (message "Can't set log.")))))
 
-(defun cake2-singularize (str)
-  "Singularize str"
-  (interactive)
-  (let ((result str))
-    (loop for rule in cake-singular-rules do
-          (unless (not (string-match (nth 0 rule) str))
-            (setq result (replace-match (nth 1 rule) nil nil str))
-            (return result)))))
-;;(cake2-singularize "App")
-
-(defun cake2-pluralize (str)
-  "Pluralize str"
-  (interactive)
-  (let ((result str))
-    (loop for rule in cake-plural-rules do
-          (unless (not (string-match (nth 0 rule) str))
-            (setq result (replace-match (nth 1 rule) nil nil str))
-            (return result)))))
-;;(cake2-pluralize "case")
-
-(defun cake2-camelize (str)
-  "Camelize snake_case str"
-  (let ((camelize-str str) (case-fold-search nil))
-    (setq camelize-str (replace-regexp-in-string
-                        "_" " "
-                        camelize-str))
-    (setq camelize-str (capitalize (downcase camelize-str)))
-    (replace-regexp-in-string
-     " " ""
-     camelize-str)))
-;;(cake2-camelize "cake2_camelize")
-
-(defun cake2-lower-camelize (str)
-  "lowerCamelize snake_case str"
-  (let ((head-str "") (tail-str "") (case-fold-search nil))
-    (if (string-match "^\\([a-z]+_\\)\\([a-z0-9_]*\\)" (downcase str))
-        (progn
-          (setq head-str (match-string 1 (downcase str)))
-          (setq tail-str (match-string 2 (capitalize str)))
-          (if (string-match "_" head-str)
-              (setq head-str (replace-match "" t nil head-str)))
-          (while (string-match "_" tail-str)
-            (setq tail-str (replace-match "" t nil tail-str)))
-          (concat head-str tail-str))
-      str)))
-;;(cake2-lower-camelize "cake2_lower_camelize")
-
-(defun cake2-snake (str) ;;copied from rails-lib.el
-  "Change snake_case."
-  (let ((case-fold-search nil))
-    (downcase
-     (replace-regexp-in-string
-      "\\([A-Z]+\\)\\([A-Z][a-z]\\)" "\\1_\\2"
-      (replace-regexp-in-string
-       "\\([a-z\\d]\\)\\([A-Z]\\)" "\\1_\\2"
-       str)))))
-;;(cake2-snake "Cake2Snake")
-;;(cake2-snake "CCake2Snake")
-
 ;;; anything sources and functions
 
 (when (require 'anything-show-completion nil t)
@@ -1221,17 +1158,17 @@
   (string-match "\\(.+\\) / \\(.+\\)" candidate)
   (setq cake2-plural-name (match-string 1 candidate))
   (setq cake2-action-name (match-string 2 candidate))
-  (setq cake2-singular-name (cake2-singularize cake2-plural-name))
-  (setq cake2-camelize-name (cake2-camelize (cake2-snake cake2-singular-name)))
-  (setq cake2-lower-camelized-action-name cake2-action-name)
-  (setq cake2-snake-action-name (cake2-snake cake2-action-name)))
+  (setq cake2-singular-name (cake-singularize cake2-plural-name))
+  (setq cake-camelize-name (cake-camelize (cake-snake cake2-singular-name)))
+  (setq cake-lower-camelized-action-name cake2-action-name)
+  (setq cake-snake-action-name (cake-snake cake2-action-name)))
 
 (defun anything-c-cake2-switch-to-view ()
   "Switch to view."
   (let (themed-dir
         (plural-name cake2-plural-name)
         (action-name cake2-action-name)
-        (snake-action-name cake2-snake-action-name))
+        (snake-action-name cake-snake-action-name))
     (progn
       (cake2-set-app-path)
       (if (and (cake2-is-view-file) cake2-themed-name)
@@ -1270,7 +1207,7 @@
       (progn
         (find-file (concat cake2-app-path "Controller/" cake2-plural-name "Controller.php"))
         (goto-char (point-min))
-        (if (not (re-search-forward (concat "function[ \t]*" cake2-lower-camelized-action-name "[ \t]*\(") nil t))
+        (if (not (re-search-forward (concat "function[ \t]*" cake-lower-camelized-action-name "[ \t]*\(") nil t))
             (progn
               (goto-char (point-min))
               (re-search-forward (concat "function[ \t]*" cake2-action-name "[ \t]*\(") nil t))))
@@ -1278,7 +1215,7 @@
         (progn
           (find-file (concat cake2-app-path cake2-plural-name "Controller.php"))
           (goto-char (point-min))
-          (if (not (re-search-forward (concat "function[ \t]*" cake2-lower-camelized-action-name "[ \t]*\(") nil t))
+          (if (not (re-search-forward (concat "function[ \t]*" cake-lower-camelized-action-name "[ \t]*\(") nil t))
               (progn
                 (goto-char (point-min))
                 (re-search-forward (concat "function[ \t]*" cake2-action-name "[ \t]*\(") nil t))))
@@ -1289,22 +1226,22 @@
 (defun anything-c-cake2-switch-to-model ()
   "Switch to model."
   (cake2-set-app-path)
-  (if (file-exists-p (concat cake2-app-path "Model/" cake2-camelize-name ".php"))
-      (find-file (concat cake2-app-path "Model/" cake2-camelize-name ".php"))
+  (if (file-exists-p (concat cake2-app-path "Model/" cake-camelize-name ".php"))
+      (find-file (concat cake2-app-path "Model/" cake-camelize-name ".php"))
     (if (file-exists-p (concat cake2-app-path "Model/" cake2-singular-name ".php"))
         (find-file (concat cake2-app-path "Model/" cake2-singular-name ".php"))
       (if (y-or-n-p "Make new file?")
-          (find-file (concat cake2-app-path "Model/" cake2-camelize-name ".php"))
-        (message (format "Can't find %s" (concat cake2-app-path "Model/" cake2-camelize-name ".php")))))))
+          (find-file (concat cake2-app-path "Model/" cake-camelize-name ".php"))
+        (message (format "Can't find %s" (concat cake2-app-path "Model/" cake-camelize-name ".php")))))))
 
 (defun anything-c-cake2-switch-to-file-function (dir)
   "Switch to file and search function."
   (cake2-set-app-path)
-  (if (not (file-exists-p (concat cake2-app-path dir cake2-camelize-name ".php")))
+  (if (not (file-exists-p (concat cake2-app-path dir cake-camelize-name ".php")))
       (if (y-or-n-p "Make new file?")
-          (find-file (concat cake2-app-path dir cake2-camelize-name ".php"))
-        (message (format "Can't find %s" (concat cake2-app-path dir cake2-camelize-name ".php"))))
-    (find-file (concat cake2-app-path dir cake2-camelize-name ".php"))
+          (find-file (concat cake2-app-path dir cake-camelize-name ".php"))
+        (message (format "Can't find %s" (concat cake2-app-path dir cake-camelize-name ".php"))))
+    (find-file (concat cake2-app-path dir cake-camelize-name ".php"))
     (goto-char (point-min))
     (re-search-forward (concat "function[ \t]*" cake2-candidate-function-name "[ \t]*\(") nil t)))
 
@@ -1324,7 +1261,7 @@
                (while (not (eobp))
                  (if (not (re-search-forward ".+\\/\\(.+\\)\.php:.*function *\\([^ ]+\\) *(.*).*" nil t))
                      (goto-char (point-max))
-                   (setq class-name (cake2-camelize (cake2-snake (match-string 1))))
+                   (setq class-name (cake-camelize (cake-snake (match-string 1))))
                    (setq function-name (match-string 2))
                    (delete-region (point) (save-excursion (beginning-of-line) (point)))
                    (insert (concat class-name "->" function-name))
@@ -1356,7 +1293,7 @@
                (while (not (eobp))
                  (if (not (re-search-forward ".+\\/\\(.+\\)\.php:.*function *\\([^ ]+\\) *(.*).*" nil t))
                      (goto-char (point-max))
-                   (setq class-name (cake2-camelize (cake2-snake (match-string 1))))
+                   (setq class-name (cake-camelize (cake-snake (match-string 1))))
                    (setq function-name (match-string 2))
                    (delete-region (point) (save-excursion (beginning-of-line) (point)))
                    (insert (concat class-name "->" function-name))
@@ -1388,7 +1325,7 @@
                (while (not (eobp))
                  (if (not (re-search-forward ".+\\/\\(.+\\)\.php:.*function *\\([^ ]+\\) *(.*).*" nil t))
                      (goto-char (point-max))
-                   (setq class-name (cake2-camelize (cake2-snake (match-string 1))))
+                   (setq class-name (cake-camelize (cake-snake (match-string 1))))
                    (setq function-name (match-string 2))
                    (delete-region (point) (save-excursion (beginning-of-line) (point)))
                    (insert (concat class-name "->" function-name))
@@ -1407,10 +1344,10 @@
 (defun anything-c-cake2-set-names2 (candidate)
   "Set names by display-to-real"
   (string-match "\\(.+\\)->\\(.+\\)" candidate)
-  (setq cake2-camelized-singular-name (match-string 1 candidate))
-  (setq cake2-camelize-name cake2-camelized-singular-name)
+  (setq cake-camelized-singular-name (match-string 1 candidate))
+  (setq cake-camelize-name cake-camelized-singular-name)
   (setq cake2-candidate-function-name (match-string 2 candidate))
-  (setq cake2-singular-name (cake2-snake cake2-camelized-singular-name))
+  (setq cake2-singular-name (cake-snake cake-camelized-singular-name))
   candidate)
 
 (defun anything-c-cake2-create-po-file-buffer ()
@@ -1539,9 +1476,9 @@
         t)
       (desc "Inflector test")
       (expect "Lib/Admin/App"
-        (cake2-singularize "Lib/Admin/App"))
+        (cake-singularize "Lib/Admin/App"))
       (expect "Lib/Admin/Post"
-        (cake2-singularize "Lib/Admin/Posts"))
+        (cake-singularize "Lib/Admin/Posts"))
       (desc "MVC switch test")
       (expect t
         (find-file (concat cake2-test-dir "app/Lib/Controller/AdminAppController.php"))
@@ -1608,4 +1545,3 @@
 
 (provide 'cake2)
 ;;; cake2.el ends here
-
