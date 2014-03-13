@@ -1,4 +1,4 @@
-;;;cake2.el ---  CakePHP2 Minor Mode
+;;;cake2.el --- CakePHP2 Minor Mode
 ;; -*- Mode: Emacs-Lisp -*-
 
 ;; Copyright (C) 2011-2014 by 101000code/101000LAB
@@ -181,6 +181,7 @@
 
 ;;(global-set-key "\C-c\C-v" 'cake2)
 
+;;;###autoload
 (define-minor-mode cake2
   "CakePHP2 minor mode."
   :lighter " Cake2"
@@ -193,7 +194,8 @@
         (run-hooks 'cake2-hook))
     nil))
 
-(if (fboundp 'define-global-minor-mode)
+;;;###autoload
+(when (fboundp 'define-global-minor-mode)
     (define-global-minor-mode global-cake2
       cake2 cake2-maybe
       :group 'cake2))
@@ -1544,4 +1546,6 @@
       )))
 
 (provide 'cake2)
+
+;;; end
 ;;; cake2.el ends here
