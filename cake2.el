@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.1.1
+;; Version: 1.1.2
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((cake-infrector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -1464,6 +1464,19 @@
     (anything (list anything-c-source-cake2-po
                     anything-c-source-cake2-po-not-found)
               initial-pattern "Find Msgid And Msgstr: " nil)))
+
+(defconst cake2-snippets-dir (file-name-directory (or (buffer-file-name)
+                                                    load-file-name)))
+
+;;;###autoload
+(defun cake2-snippets-initialize ()
+  (let ((snip-dir (expand-file-name "snippets" cake2-snippets-dir)))
+    (add-to-list 'yas-snippet-dirs snip-dir t)
+    (yas-load-directory snip-dir)))
+
+;;;###autoload
+(eval-after-load 'yasnippet
+   '(cake2-snippets-initialize))
 
 ;; Tests
 (dont-compile
