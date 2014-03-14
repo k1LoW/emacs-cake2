@@ -20,7 +20,7 @@
 ;; Version: 1.1.2
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
-;; Package-Requires: ((cake-infrector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
+;; Package-Requires: ((cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
 
 ;;; Install
 ;; Put this file into load-path'ed directory, and byte compile it if
