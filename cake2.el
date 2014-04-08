@@ -1484,7 +1484,7 @@
     (expectations
       (desc "init")
       (expect t
-        (setq cake2-test-dir (expand-file-name (concat default-directory "t/")))
+        (setq cake2-test-dir (expand-file-name (concat default-directory "t/test1/")))
         t)
       (expect t
         (global-cake2 t)
