@@ -144,6 +144,11 @@
 ;;; Code:
 
 ;;require
+(require 'dash)
+(require 's)
+(require 'f)
+(require 'ht)
+(require 'json)
 (require 'cake-inflector)
 (require 'cl)
 (require 'anything)
@@ -1484,7 +1489,7 @@
     (expectations
       (desc "init")
       (expect t
-        (setq cake2-test-dir (expand-file-name (concat default-directory "t/test1/")))
+        (setq cake2-test-dir (f-expand "t/test1"))
         t)
       (expect t
         (global-cake2 t)
@@ -1496,25 +1501,25 @@
         (cake-singularize "Lib/Admin/Posts"))
       (desc "MVC switch test")
       (expect t
-        (find-file (concat cake2-test-dir "app/Lib/Controller/AdminAppController.php"))
+        (find-file (f-expand "app/Lib/Controller/AdminAppController.php" cake2-test-dir))
         (cake2-maybe))
       (expect t
-        (find-file (concat cake2-test-dir "app/Controller/PostsController.php"))
+        (find-file (f-expand "app/Controller/PostsController.php" cake2-test-dir))
         (cake2-maybe))
-      (expect (concat cake2-test-dir "app/Model/Post.php")
+      (expect (f-expand "app/Model/Post.php" cake2-test-dir)
         (cake2-switch-to-model)
-        (expand-file-name (buffer-file-name)))
-      (expect (concat cake2-test-dir "app/Controller/PostsController.php")
+        (f-expand (buffer-file-name)))
+      (expect (f-expand "app/Controller/PostsController.php" cake2-test-dir)
         (cake2-switch-to-controller)
-        (expand-file-name (buffer-file-name)))
-      (expect (concat cake2-test-dir "app/View/Posts/add.ctp")
+        (f-expand (buffer-file-name)))
+      (expect (f-expand "app/View/Posts/add.ctp" cake2-test-dir)
         (goto-char (point-min))
         (re-search-forward "function add()" nil t)
         (cake2-switch-to-view)
-        (expand-file-name (buffer-file-name)))
-      (expect (concat cake2-test-dir "app/Controller/PostsController.php")
+        (f-expand (buffer-file-name)))
+      (expect (f-expand "app/Controller/PostsController.php" cake2-test-dir)
         (cake2-switch-to-controller)
-        (expand-file-name (buffer-file-name)))
+        (f-expand (buffer-file-name)))
       (expect t
         (stringp (executable-find "grep")))
       (expect t
@@ -1550,12 +1555,12 @@
         (anything-c-cake2-set-names "Admin/AdminPosts / index")
         cake2-singular-name)
       (expect t
-        (find-file (concat cake2-test-dir "app/Controller/NoActionController.php"))
+        (find-file (f-expand "app/Controller/NoActionController.php" cake2-test-dir))
         (cake2-maybe))
-      (expect (concat cake2-test-dir "app/Controller/NoActionController.php")
+      (expect (f-expand "app/Controller/NoActionController.php" cake2-test-dir)
         (goto-char (point-max))
         (cake2-switch-to-view)
-        (expand-file-name (buffer-file-name)))
+        (f-expand (buffer-file-name)))
       )))
 
 (provide 'cake2)
