@@ -17,10 +17,10 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 1.1.2
+;; Version: 2.0.0
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
-;; Package-Requires: ((cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
+;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.3") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
 
 ;;; Install
 ;; Put this file into load-path'ed directory, and byte compile it if
