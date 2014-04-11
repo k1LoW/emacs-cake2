@@ -201,9 +201,9 @@
 
 ;;;###autoload
 (when (fboundp 'define-global-minor-mode)
-    (define-global-minor-mode global-cake2
-      cake2 cake2::maybe
-      :group 'cake2))
+  (define-global-minor-mode global-cake2
+    cake2 cake2::maybe
+    :group 'cake2))
 
 (defun cake2::maybe ()
   "What buffer `cake2' prefers."
@@ -238,7 +238,7 @@
 (defvar cake2::plural-name nil
   "CakePHP2 current plural name.")
 
-(defvar cake-camelize-name nil
+(defvar cake2::camelize-name nil
   "CakePHP2 current camelize name.")
 
 (defvar cake2::themed-name nil
@@ -331,7 +331,7 @@
       nil
     (setq cake2::singular-name (match-string 1 (buffer-file-name)))
     (setq cake2::plural-name (cake-pluralize cake2::singular-name))
-    (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+    (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'model)))
 
 (defun cake2::is-view-file ()
@@ -346,7 +346,7 @@
         (setq cake2::view-extension (match-string 5 (buffer-file-name)))
         (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
         (setq cake2::singular-name (cake-singularize cake2::plural-name))
-        (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+        (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
         (setq cake2::current-file-type 'view))
     (if (not (string-match cake2::view-regexp (buffer-file-name)))
         nil
@@ -355,7 +355,7 @@
       (setq cake2::view-extension (match-string 4 (buffer-file-name)))
       (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
       (setq cake2::singular-name (cake-singularize cake2::plural-name))
-      (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+      (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
       (setq cake2::current-file-type 'view))))
 
 (defun cake2::is-controller-file ()
@@ -377,7 +377,7 @@
         (setq cake2::lower-camelized-action-name nil)
         (setq cake2::snake-action-name nil)))
     (setq cake2::singular-name (cake-singularize cake2::plural-name))
-    (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+    (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'controller)))
 
 (defun cake2::is-behavior-file ()
@@ -408,7 +408,7 @@
       nil
     (setq cake2::singular-name (match-string 1 (buffer-file-name)))
     (setq cake2::plural-name (cake-pluralize cake2::singular-name))
-    (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+    (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'model-testcase)))
 
 (defun cake2::is-controller-testcase-file ()
@@ -418,7 +418,7 @@
       nil
     (setq cake2::plural-name (match-string 1 (buffer-file-name)))
     (setq cake2::singular-name (cake-singularize cake2::plural-name))
-    (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+    (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'controller-testcase)))
 
 (defun cake2::is-fixture-file ()
@@ -428,7 +428,7 @@
       nil
     (setq cake2::singular-name (match-string 1 (buffer-file-name)))
     (setq cake2::plural-name (cake-pluralize cake2::singular-name))
-    (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+    (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'fixture)))
 
 (defun cake2::is-javascript-file ()
@@ -484,14 +484,15 @@
   "Find app directory."
   (let ((current-dir (f-expand default-directory)))
     (loop with count = 0
-          until (f-exists? (concat current-dir "/Config/core.php"))
+          until (f-exists? (f-join current-dir "Config/core.php"))
           ;; Return nil if outside the value of
           if (= count cake2::dir-search-limit)
           do (return nil)
           ;; Or search upper directories.
           else
           do (incf count)
-          (setq current-dir (f-dirname current-dir))
+          (unless (f-root? current-dir)
+            (setq current-dir (f-dirname current-dir)))
           finally return current-dir)))
 
 (defun cake2::set-regexp ()
@@ -515,7 +516,7 @@
   (interactive)
   (cake2::is-file)
   (if (cake2::is-file)
-      (cake2::switch-to-file (concat cake2::app-path "/Model/" cake-camelize-name ".php"))
+      (cake2::switch-to-file (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
     (message "Can't find model name.")))
 
 (defun cake2::switch-to-view ()
@@ -531,44 +532,44 @@
           (if view-files
               (cond
                ((= 1 (length view-files))
-                (find-file (concat cake2::app-path "/View/" cake2::plural-name "/" (car view-files))))
+                (find-file (f-join cake2::app-path "View" cake2::plural-name (car view-files))))
                (t (anything
                    '(((name . "Switch to view")
                       (candidates . view-files)
                       (display-to-real . (lambda (candidate)
-                                           (concat cake2::app-path "/View/" cake2::plural-name "/" candidate)
+                                           (f-join cake2::app-path "View" cake2::plural-name candidate)
                                            ))
                       (type . file)))
                    nil nil nil nil)
                   ))
             (if (y-or-n-p "Make new file?")
                 (progn
-                  (unless (file-directory-p (concat cake2::app-path "/View/" cake2::plural-name "/"))
-                    (make-directory (concat cake2::app-path "/View/" cake2::plural-name "/")))
-                  (find-file (concat cake2::app-path "/View/" cake2::plural-name "/" cake2::action-name "." cake2::view-extension)))
-              (message (format "Can't find %s" (concat cake2::app-path "/View/" cake2::plural-name "/" cake2::action-name "." cake2::view-extension))))))
+                  (unless (f-dir? (f-join cake2::app-path "View" cake2::plural-name))
+                    (make-directory (f-join cake2::app-path "View" cake2::plural-name)))
+                  (find-file (f-join cake2::app-path "View" cake2::plural-name (concat cake2::action-name "." cake2::view-extension))))
+              (message (format "Can't find %s" (f-join cake2::app-path "View" cake2::plural-name (concat cake2::action-name "." cake2::view-extension)))))))
       (message "Can't switch to view."))))
 
 (defun cake2::set-view-list ()
   "Set view list."
-  (let ((dir (concat cake2::app-path "/View/" cake2::plural-name))
-        (view-dir nil)
-        (view-files nil))
-    (unless (not (file-directory-p dir))
-      (setq view-dir (remove-if-not (lambda (x) (file-directory-p (concat cake2::app-path "/View/" cake2::plural-name "/" x))) (directory-files dir)))
-      (setq view-dir (remove-if (lambda (x) (equal x "..")) view-dir))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2::app-path "/View/" cake2::plural-name "/" x "/" cake2::snake-action-name "." cake2::view-extension))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2::snake-action-name "." cake2::view-extension) y)) view-files)
-                                       (push (concat x "/" cake2::snake-action-name "." cake2::view-extension) view-files))))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2::app-path "/View/" cake2::plural-name "/" x "/" cake2::snake-action-name ".ctp"))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2::snake-action-name ".ctp") y)) view-files)
-                                       (push (concat x "/" cake2::snake-action-name ".ctp") view-files))))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2::app-path "/View/" cake2::plural-name "/" x "/" cake2::action-name "." cake2::view-extension))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2::action-name "." cake2::view-extension) y)) view-files)
-                                       (push (concat x "/" cake2::action-name "." cake2::view-extension) view-files))))
-      (loop for x in view-dir do (if (file-exists-p (concat cake2::app-path "/View/" cake2::plural-name "/" x "/" cake2::action-name ".ctp"))
-                                     (unless (some (lambda (y) (equal (concat x "/" cake2::action-name ".ctp") y)) view-files)
-                                       (push (concat x "/" cake2::action-name ".ctp") view-files)))))
+  (let* ((dir (f-join cake2::app-path "View" cake2::plural-name))
+         (view-dir (list dir))
+         (view-files nil))
+    (unless (not (f-dir? dir))
+      (unless (not (f-directories dir))
+        (-flatten (add-to-list `view-dir (f-directories dir))))
+      (loop for x in view-dir do (if (f-exists? (f-join cake2::app-path "View" cake2::plural-name x (concat cake2::snake-action-name "." cake2::view-extension)))
+                                     (unless (some (lambda (y) (equal (f-join x (concat cake2::snake-action-name "." cake2::view-extension)) y)) view-files)
+                                       (push (f-join x (concat cake2::snake-action-name "." cake2::view-extension)) view-files))))
+      (loop for x in view-dir do (if (f-exists? (f-join cake2::app-path "View" cake2::plural-name x (concat cake2::snake-action-name ".ctp")))
+                                     (unless (some (lambda (y) (equal (f-join x (concat cake2::snake-action-name ".ctp")) y)) view-files)
+                                       (push (f-join x (concat cake2::snake-action-name ".ctp")) view-files))))
+      (loop for x in view-dir do (if (f-exists? (f-join cake2::app-path "View" cake2::plural-name x (concat cake2::action-name "." cake2::view-extension)))
+                                     (unless (some (lambda (y) (equal (f-join x (concat cake2::action-name "." cake2::view-extension)) y)) view-files)
+                                       (push (f-join x (concat cake2::action-name "." cake2::view-extension)) view-files))))
+      (loop for x in view-dir do (if (f-exists? (f-join cake2::app-path "View" cake2::plural-name x (concat cake2::action-name ".ctp")))
+                                     (unless (some (lambda (y) (equal (f-join x (concat cake2::action-name ".ctp")) y)) view-files)
+                                       (push (f-join x (concat cake2::action-name ".ctp")) view-files)))))
     view-files))
 
 (defun cake2::switch-to-controller ()
@@ -576,9 +577,9 @@
   (interactive)
   (if (cake2::is-file)
       (progn
-        (if (file-exists-p (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
+        (if (f-exists? (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
             (progn
-              (find-file (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
+              (find-file (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
               (goto-char (point-min))
               (if (not (re-search-forward (concat "function[ \t]*" cake2::lower-camelized-action-name "[ \t]*\(") nil t))
                   (progn
@@ -586,38 +587,44 @@
                     (re-search-forward (concat "function[ \t]*" cake2::action-name "[ \t]*\(") nil t)))
               (recenter))
           (if (y-or-n-p "Make new file?")
-              (find-file (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
-            (message (format "Can't find %s" (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))))))
+              (find-file (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
+            (message (format "Can't find %s" (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))))))
     (message "Can't switch to contoroller.")))
 
 (defun cake2::switch-to-model-testcase ()
   "Switch to model testcase."
   (interactive)
   (if (cake2::is-file)
-      (cake2::switch-to-file (concat cake2::app-path "/Test/Case/Model/" cake2::singular-name "Test.php"))
+      (cake2::switch-to-file (f-join cake2::app-path "Test/Case/Model" (concat cake2::singular-name "Test.php")))
     (message "Can't switch to model testcase.")))
 
 (defun cake2::switch-to-controller-testcase ()
   "Switch to contoroller testcase."
   (interactive)
   (if (cake2::is-file)
-      (cake2::switch-to-file (concat cake2::app-path "/Test/Case/Controller/" cake2::plural-name "ControllerTest.php"))
+      (cake2::switch-to-file (f-join cake2::app-path "Test/Case/Controller" (concat cake2::plural-name "ControllerTest.php")))
     (message "Can't switch to contoroller testcase.")))
 
 (defun cake2::switch-to-fixture ()
   "Switch to fixture."
   (interactive)
   (if (cake2::is-file)
-      (cake2::switch-to-file (concat cake2::app-path "/Test/Fixture/" cake2::singular-name "Fixture.php"))
+      (cake2::switch-to-file (f-join cake2::app-path "Test/Fixture" (cake2::singular-name "Fixture.php")))
     (message "Can't switch to fixture.")))
 
 (defun cake2::switch-to-file (file-path)
   "Switch to file."
-  (if (file-exists-p file-path)
+  (if (f-exists? file-path)
       (find-file file-path)
     (if (y-or-n-p "Make new file?")
         (find-file file-path)
       (message (format "Can't find %s" file-path)))))
+
+(defun cake2::find-file-if-exists (file-path)
+  "find file if file exsits."
+  (if (f-exists? file-path)
+      (find-file file-path)
+    nil))
 
 (defun cake2::search-functions ()
   "Search function from current buffer."
@@ -661,14 +668,14 @@
     (if (cake2::is-view-file)
         (progn
           (unless (not cake2::themed-name)
-            (setq themed-path (concat "Themed/" cake2::themed-name "/")))
+            (setq themed-path (f-join "Themed" cake2::themed-name)))
           (if (or (string-match "renderElement( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*)" (cake2::get-current-line))
                   (string-match "element(['\"]\\( *[-a-zA-Z0-9_/\.]+\\)['\"].*)" (cake2::get-current-line)))
-              (if (file-exists-p (concat cake2::app-path "/View/" themed-path "Elements/" (match-string 1 (cake2::get-current-line)) "." cake2::view-extension))
-                  (find-file (concat cake2::app-path "/View/" themed-path "Elements/" (match-string 1 (cake2::get-current-line)) "." cake2::view-extension))
-                (if (y-or-n-p "Make new file?")
-                    (find-file (concat cake2::app-path "/View/" themed-path "Elements/" (match-string 1 (cake2::get-current-line)) "." cake2::view-extension))
-                  (message (format "Can't find %s" (concat cake2::app-path "/View/" themed-path "Elements/" (match-string 1 (cake2::get-current-line)) "." cake2::view-extension)))))
+              (progn (setq element-name (match-string 1 (cake2::get-current-line)))
+                     (unless (cake2::find-file-if-exists (f-join cake2::app-path "View" themed-path "Elements" (concat element-name "." cake2::view-extension)))
+                       (if (y-or-n-p "Make new file?")
+                           (find-file (f-join cake2::app-path "View" themed-path "Elements" (concat element-name "." cake2::view-extension)))
+                         (message (format "Can't find %s" (f-join cake2::app-path "View" themed-path "Elements" (concat element-name "." cake2::view-extension)))))))
             (if (not (and (region-active-p)
                           (y-or-n-p "Can't find element name. Make new file?")))
                 (message "Can't find element name.")
@@ -677,43 +684,47 @@
                   (message "Can't find element name.")
                 (kill-region (point) (mark))
                 (insert (concat "<?php echo $this->element('" element-name "'); ?>"))
-                (find-file (concat cake2::app-path "/View/" themed-path "Elements/" element-name "." cake2::view-extension))
+                (find-file (f-join cake2::app-path "View" themed-path "Elements" (concat element-name "." cake2::view-extension)))
                 (yank)))))
       (message "Current buffer is not view."))))
 
 (defun cake2::switch-to-javascript ()
   "Switch to javascript."
   (interactive)
-  (if (cake2::set-app-path)
-      (if (or (string-match "$javascript->link( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))
-              (string-match "$this->Html->script( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))) ;;1.3x
-          (cond
-           ((file-exists-p (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line))))
-            (find-file (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line)))))
-           ((file-exists-p (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line)) ".js"))
-            (find-file (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line)) ".js")))
-           ((y-or-n-p "Make new file?")
-            (find-file (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line)) ".js")))
-           (message (format "Can't find %s" (concat cake2::app-path "/webroot/js/" (match-string 1 (cake2::get-current-line)) ".js"))))
-        (message "Can't find javascript name."))
-    (message "Can't set app path.")))
+  (let ((js-name nil))
+    (if (cake2::set-app-path)
+        (if (or (string-match "$javascript->link( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))
+                (string-match "$this->Html->script( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line)))
+            (progn (setq js-name (match-string 1 (cake2::get-current-line)))
+                   (cond
+                    ((cake2::find-file-if-exists (f-join cake2::app-path "webroot/js" js-name))
+                     t)
+                    ((cake2::find-file-if-exists (f-join cake2::app-path "webroot/js" (concat js-name ".js")))
+                     t)
+                    ((y-or-n-p "Make new file?")
+                     (find-file (f-join cake2::app-path "webroot/js" (concat js-name ".js"))))
+                    (message (format "Can't find %s" (f-join cake2::app-path "webroot/js" (concat js-name ".js"))))))
+          (message "Can't find javascript name."))
+      (message "Can't set app path."))))
 
 (defun cake2::switch-to-css ()
   "Switch to stylesheet."
   (interactive)
-  (if (cake2::set-app-path)
-      (if (or (string-match "$html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))
-              (string-match "$this->Html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line)))
-          (cond
-           ((file-exists-p (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line))))
-            (find-file (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line)))))
-           ((file-exists-p (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line)) ".css"))
-            (find-file (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line)) ".css")))
-           ((y-or-n-p "Make new file?")
-            (find-file (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line)) ".css")))
-           (message (format "Can't find %s" (concat cake2::app-path "/webroot/css/" (match-string 1 (cake2::get-current-line)) ".css"))))
-        (message "Can't find stylesheet  name."))
-    (message "Can't set app path.")))
+  (let ((css-name nil))
+    (if (cake2::set-app-path)
+        (if (or (string-match "$html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))
+                (string-match "$this->Html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line)))
+            (progn (setq css-name (match-string 1 (cake2::get-current-line)))
+                   (cond
+                    ((cake2::find-file-if-exists (f-join cake2::app-path "webroot/css" css-name))
+                     t)
+                    ((cake2::find-file-if-exists (f-join cake2::app-path "webroot/css" (concat css-name ".css")))
+                     t)
+                    ((y-or-n-p "Make new file?")
+                     (find-file (f-join cake2::app-path "webroot/css" (concat css-name ".css"))))
+                    (message (format "Can't find %s" (f-join cake2::app-path "webroot/css" (concat css-name ".css"))))))
+          (message "Can't find stylesheet  name."))
+      (message "Can't set app path."))))
 
 (defun cake2::switch ()
   "Omni switch function."
@@ -767,52 +778,29 @@
     (if (cake2::set-app-path)
         (progn
           (loop for d in dir do
-                (unless (not (file-directory-p (concat cake2::app-path d)))
+                (unless (not (f-dir? (f-join cake2::app-path d)))
                   (push
                    `((name . ,(concat "Open directory: " d))
                      (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2::directory-files d recursive)))
                      (display-to-real . (lambda (candidate)
-                                          (concat ,cake2::app-path ,d candidate)))
+                                          (f-join ,cake2::app-path ,d candidate)))
                      (type . file))
                    sources)))
           (reverse sources))
       nil)))
 
 (defun cake2::directory-files (dir &optional recursive)
-  "Get DIR files.  If RECURSIVE = true, get DIR recuresively."
-  (let
-      (file-list file)
-    (if (not recursive)
-        (remove-if (lambda (x) (equal x "..")) (directory-files (concat cake2::app-path dir)))
-      (loop for x in (cake2::get-recuresive-path-list (concat cake2::app-path dir))
-            do (progn
-                 (string-match (concat cake2::app-path dir "\\(.+\\)") x)
-                 (push (match-string 1 x) file-list)))
-      (remove-if (lambda (x) (equal x "..")) file-list))))
-
-(defun cake2::get-recuresive-path-list (file-list)
-  "Get FILE-LIST recuresively."
-  (let ((path-list nil))
-    (unless (listp file-list)
-      (setq file-list (list file-list)))
-    (loop for x
-          in file-list
-          do (if (file-directory-p x)
-                 (setq path-list
-                       (append
-                        (cake2::get-recuresive-path-list
-                         (remove-if
-                          (lambda(y) (string-match "\\.$\\|\\.svn" y)) (directory-files x t)))
-                        path-list))
-               (setq path-list (push x path-list))))
-    path-list))
+  "Get DIR files. If RECURSIVE = true, get DIR recuresively."
+  (-map
+   (lambda (file) (f-relative file (f-join cake2::app-path dir)))
+   (f-files (f-join cake2::app-path dir) (lambda (file) (not (s-matches? "\\.svn" (f-long file)))) recursive)))
 
 (defun cake2::open-models-dir ()
   "Open models directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Model/") nil))) plugin-list))
-    (push "Model/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Model") nil))) plugin-list))
+    (push "Model" plugin-list)
     (cake2::open-dir plugin-list t "Behavior\\|Datasource")))
 
 (defun cake2::open-views-dir ()
@@ -821,16 +809,16 @@
   (let ((themed-list (cake2::find-themed-dir)) (plugin-list (cake2::find-plugin-dir)))
     (if (not (or (cake2::is-model-file) (cake2::is-controller-file) (cake2::is-view-file)))
         (cake2::open-all-views-dir)
-      (setq themed-list (mapcar (function (lambda (c) (if c (concat c cake2::plural-name "/") nil))) themed-list))
-      (push (concat "View/" cake2::plural-name "/") themed-list)
+      (setq themed-list (mapcar (function (lambda (c) (if c (f-join c cake2::plural-name) nil))) themed-list))
+      (push (f-join "View" cake2::plural-name) themed-list)
       (cake2::open-dir themed-list))))
 
 (defun cake2::open-all-views-dir ()
   "Open all views directory."
   (interactive)
   (let ((themed-list (cake2::find-themed-dir)) (plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/") nil))) plugin-list))
-    (push "View/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View") nil))) plugin-list))
+    (push "View" plugin-list)
     (cake2::open-dir plugin-list t "Helper")))
 
 (defun cake2::open-controllers-dir ()
@@ -838,57 +826,57 @@
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir))
         (controller-list (cake2::find-controller-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Controller/") nil))) plugin-list))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Controller") nil))) plugin-list))
     (setq controller-list (append controller-list plugin-list))
-    (push "Controller/" controller-list)
+    (push "Controller" controller-list)
     (cake2::open-dir (remove-if (lambda (x) (string-match "Component" x)) controller-list) t "Component")))
 
 (defun cake2::open-behaviors-dir ()
   "Open behaviors directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Model/Behavior/") nil))) plugin-list))
-    (push "Model/Behavior/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Model/Behavior") nil))) plugin-list))
+    (push "Model/Behavior" plugin-list)
     (cake2::open-dir plugin-list)))
 
 (defun cake2::open-helpers-dir ()
   "Open helpers directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/Helper/") nil))) plugin-list))
-    (push "View/Helper/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Helper") nil))) plugin-list))
+    (push "View/Helper" plugin-list)
     (cake2::open-dir plugin-list)))
 
 (defun cake2::open-components-dir ()
   "Open components directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Controller/Component/") nil))) plugin-list))
-    (push "Controller/Component/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Controller/Component") nil))) plugin-list))
+    (push "Controller/Component" plugin-list)
     (cake2::open-dir plugin-list)))
 
 (defun cake2::open-libs-dir ()
   "Open libs dir."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Lib/") nil))) plugin-list))
-    (push "Lib/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Lib") nil))) plugin-list))
+    (push "Lib" plugin-list)
     (cake2::open-dir plugin-list t)))
 
 (defun cake2::open-config-dir ()
   "Open config dir."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "Config/") nil))) plugin-list))
-    (push "Config/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Config") nil))) plugin-list))
+    (push "Config" plugin-list)
     (cake2::open-dir plugin-list t)))
 
 (defun cake2::open-layouts-dir ()
   "Open layouts directory."
   (interactive)
   (let ((themed-list (cake2::find-themed-dir)))
-    (setq themed-list (mapcar (function (lambda (c) (if c (concat c "Layouts/") nil))) themed-list))
-    (push (concat "View/Layouts/") themed-list)
+    (setq themed-list (mapcar (function (lambda (c) (if c (f-join c "Layouts") nil))) themed-list))
+    (push "View/Layouts" themed-list)
     (cake2::open-dir themed-list t)))
 
 (defun cake2::open-layouts-dir ()
@@ -897,10 +885,10 @@
   (let ((layouts)
         (plugin-list (cake2::find-plugin-dir))
         (themed-list (cake2::find-themed-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/Layouts/") nil))) plugin-list))
-    (setq themed-list (mapcar (function (lambda (c) (if c (concat c "Layouts/") nil))) themed-list))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Layouts") nil))) plugin-list))
+    (setq themed-list (mapcar (function (lambda (c) (if c (f-join c "Layouts") nil))) themed-list))
     (setq layouts (append plugin-list themed-list))
-    (push (concat "View/Layouts/") layouts)
+    (push "View/Layouts" layouts)
     (cake2::open-dir layouts t)))
 
 (defun cake2::open-elements-dir ()
@@ -909,26 +897,26 @@
   (let ((elements)
         (plugin-list (cake2::find-plugin-dir))
         (themed-list (cake2::find-themed-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "View/Elements/") nil))) plugin-list))
-    (setq themed-list (mapcar (function (lambda (c) (if c (concat c "Elements/") nil))) themed-list))
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Elements") nil))) plugin-list))
+    (setq themed-list (mapcar (function (lambda (c) (if c (f-join c "Elements") nil))) themed-list))
     (setq elements (append plugin-list themed-list))
-    (push (concat "View/Elements/") elements)
+    (push "View/Elements" elements)
     (cake2::open-dir elements t)))
 
 (defun cake2::open-js-dir ()
   "Open JavaScript directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "webroot/js/") nil))) plugin-list))
-    (push "webroot/js/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "webroot/js") nil))) plugin-list))
+    (push "webroot/js" plugin-list)
     (cake2::open-dir plugin-list t)))
 
 (defun cake2::open-css-dir ()
   "Open css directory."
   (interactive)
   (let ((plugin-list (cake2::find-plugin-dir)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (concat c "webroot/css/") nil))) plugin-list))
-    (push "webroot/css/" plugin-list)
+    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "webroot/css") nil))) plugin-list))
+    (push "webroot/css" plugin-list)
     (cake2::open-dir plugin-list t)))
 
 (defun cake2::open-tests-dir ()
@@ -936,39 +924,31 @@
   (interactive)
   (let ((tests nil)
         (plugin-list (cake2::find-plugin-dir)))
-    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Tests/Group/") nil))) plugin-list) tests))
-    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Fixture/") nil))) plugin-list) tests))
-    (setq tests (append (mapcar (function (lambda (c) (if c (concat c "Test/Case/") nil))) plugin-list) tests))
-    (push "Tests/Group/" tests)
-    (push "Test/Fixture/" tests)
-    (push "Test/Case/" tests)
+    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Tests/Group") nil))) plugin-list) tests))
+    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Test/Fixture") nil))) plugin-list) tests))
+    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Test/Case") nil))) plugin-list) tests))
+    (push "Tests/Group" tests)
+    (push "Test/Fixture" tests)
+    (push "Test/Case" tests)
     (cake2::open-dir tests t)))
 
 (defun cake2::find-themed-dir ()
   "Find themed directory. like app/View/Themed/m"
-  (cake2::find-dir-list "View/Themed/"))
+  (cake2::find-dir-list "View/Themed"))
 
 (defun cake2::find-controller-dir ()
   "Find plugin directory. like app/Controller"
-  (remove-if (lambda (x) (string-match "Component" x)) (cake2::find-dir-list "Contoller/")))
+  (remove-if (lambda (x) (string-match "Component" x)) (cake2::find-dir-list "Contoller")))
 
 (defun cake2::find-plugin-dir ()
   "Find plugin directory. like app/plugins"
-  (cake2::find-dir-list "Plugin/"))
+  (cake2::find-dir-list "Plugin"))
 
 (defun cake2::find-dir-list (dir)
   "Find directory list."
-  (let (d l)
-    (if (and (cake2::set-app-path) (file-directory-p (concat cake2::app-path dir)))
-        (progn
-          (setq d (concat cake2::app-path dir))
-          (loop for x in (directory-files d)
-                do (unless (or
-                            (not (file-directory-p (concat d x)))
-                            (string-match "\\.\\.?" x))
-                     (push (concat dir x "/") l)))
-          (reverse l))
-      nil)))
+  (if (f-dir? (f-join cake2::app-path dir))
+      (f-directories (f-join cake2::app-path dir))
+    nil))
 
 (defvar cake2::source-version
   '((name . "CakePHP2 core version")
@@ -992,10 +972,8 @@
                                         (while (string-match "_\\|\.Php" c)
                                           (setq c (replace-match "" nil nil c)))
                                         (concat "$this->loadModel('" c "');")
-                                        ))
-                            (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
-                                                       (file-directory-p (concat cake2::app-path "/Model/" x))))
-                                       (directory-files (concat cake2::app-path "/Model/")))
+                                        ))                            
+                            (cake2::directory-files "Model")
                             )))
     (action
      ("Insert Code" . (lambda (candidate)
@@ -1010,8 +988,8 @@
                                             (setq c (replace-match "" nil nil c)))
                                         (concat "$this->Html->script('" c "');")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
-                                                       (file-directory-p (concat cake2::app-path "/webroot/js/" x))))
-                                       (cake2::directory-files "webroot/js/" t)))))
+                                                       (f-dir? (f-join cake2::app-path "webroot/js" x))))
+                                       (cake2::directory-files "webroot/js" t)))))
     (action
      ("Insert Code" . (lambda (candidate)
                         (delete-backward-char (length cake2::initial-input))
@@ -1025,8 +1003,8 @@
                                             (setq c (replace-match "" nil nil c)))
                                         (concat "$this->Html->css('" c "');")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
-                                                       (file-directory-p (concat cake2::app-path "/webroot/css/" x))))
-                                       (cake2::directory-files "webroot/css/" t)))))
+                                                       (f-dir? (f-join cake2::app-path "webroot/css" x))))
+                                       (cake2::directory-files "webroot/css" t)))))
     (action
      ("Insert Code" . (lambda (candidate)
                         (delete-backward-char (length cake2::initial-input))
@@ -1037,8 +1015,8 @@
     (candidates . (lambda ()
                     (mapcar (function (lambda (c) (concat "$this->layout = '" c "';")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
-                                                       (file-directory-p (concat cake2::app-path "/View/Layouts/" x))))
-                                       (cake2::directory-files "View/Layouts/" t)))))
+                                                       (f-dir? (f-join cake2::app-path "View/Layouts" x))))
+                                       (cake2::directory-files "View/Layouts" t)))))
     (action
      ("Insert Code" . (lambda (candidate)
                         (delete-backward-char (length cake2::initial-input))
@@ -1052,8 +1030,8 @@
                                             (setq c (replace-match "" nil nil c)))
                                         (concat "$this->element('" c "');")))
                             (remove-if (lambda (x) (or (string-match "~$\\|\\.$" x)
-                                                       (file-directory-p (concat cake2::app-path "/View/Elements/" x))))
-                                       (cake2::directory-files "View/Elements/" t)))))
+                                                       (f-dir? (f-join cake2::app-path "View/Elements" x))))
+                                       (cake2::directory-files "View/Elements" t)))))
     (action
      ("Insert Code" . (lambda (candidate)
                         (delete-backward-char (length cake2::initial-input))
@@ -1100,7 +1078,7 @@
       (mapcar
        (function (lambda (el)
                    (if (listp el) el(cons el el))))
-       (directory-files (concat cake2::app-path "/tmp/logs/") nil "\\.log$"))
+       (f-glob "*.log" (f-join cake2::app-path "tmp/logs")))
     nil))
 
 (defun cake2::tail-log (log)
@@ -1108,7 +1086,7 @@
   (interactive
    (list (completing-read "tail log: " (cake2::logs) nil t "debug.log")))
   (if (require 'tail nil t)             ;xcezx patch.
-      (tail-file (concat cake2::app-path "/tmp/logs/" log))
+      (tail-file (f-join cake2::app-path "tmp/logs" log))
     (let ((logbuffer (concat "*" log "*")))
       (if (and (cake2::logs) (executable-find "tail"))
           (progn
@@ -1171,89 +1149,87 @@
   (setq cake2::plural-name (match-string 1 candidate))
   (setq cake2::action-name (match-string 2 candidate))
   (setq cake2::singular-name (cake-singularize cake2::plural-name))
-  (setq cake-camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+  (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
   (setq cake2::lower-camelized-action-name cake2::action-name)
   (setq cake2::snake-action-name (cake-snake cake2::action-name)))
 
 (defun anything-c-cake2::switch-to-view ()
   "Switch to view."
-  (let (themed-dir
+  (let ((themed-dir "")
         (plural-name cake2::plural-name)
         (action-name cake2::action-name)
         (snake-action-name cake2::snake-action-name))
     (progn
       (cake2::set-app-path)
       (if (and (cake2::is-view-file) cake2::themed-name)
-          (setq themed-dir (concat "Themed/" cake2::themed-name "/")))
+          (setq themed-dir (f-join "Themed" cake2::themed-name)))
       (cond
-       ((file-exists-p (concat cake2::app-path "/View/" themed-dir plural-name "/" snake-action-name "." cake2::view-extension))
-        (find-file (concat cake2::app-path "/View/" themed-dir plural-name "/" snake-action-name "." cake2::view-extension)))
-       ((file-exists-p (concat cake2::app-path "/View/" themed-dir plural-name "/" snake-action-name ".ctp"))
-        (find-file (concat cake2::app-path "/View/" themed-dir plural-name "/" snake-action-name ".ctp")))
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" themed-dir plural-name (concat snake-action-name "." cake2::view-extension)))
+        t)
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" themed-dir plural-name (concat snake-action-name ".ctp")))
+        t)
 
-       ((file-exists-p (concat cake2::app-path "/View/" themed-dir plural-name "/" action-name "." cake2::view-extension))
-        (find-file (concat cake2::app-path "/View/" themed-dir plural-name "/" action-name "." cake2::view-extension)))
-       ((file-exists-p (concat cake2::app-path "/View/" themed-dir plural-name "/" action-name ".ctp"))
-        (find-file (concat cake2::app-path "/View/" themed-dir plural-name "/" action-name ".ctp")))
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" themed-dir plural-name (concat action-name "." cake2::view-extension)))
+        t)
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" themed-dir plural-name (concat action-name ".ctp")))
+        t)
 
-       ((file-exists-p (concat cake2::app-path "/View/" plural-name "/" snake-action-name "." cake2::view-extension))
-        (find-file (concat cake2::app-path "/View/" plural-name "/" snake-action-name "." cake2::view-extension)))
-       ((file-exists-p (concat cake2::app-path "/View/" plural-name "/" snake-action-name ".ctp"))
-        (find-file (concat cake2::app-path "/View/" plural-name "/" snake-action-name ".ctp")))
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" plural-name (concat snake-action-name "." cake2::view-extension)))
+        t)
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" plural-name (concat snake-action-name ".ctp")))
+        t)
 
-       ((file-exists-p (concat cake2::app-path "/View/" plural-name "/" action-name "." cake2::view-extension))
-        (find-file (concat cake2::app-path "/View/" plural-name "/" action-name "." cake2::view-extension)))
-       ((file-exists-p (concat cake2::app-path "/View/" plural-name "/" action-name ".ctp"))
-        (find-file (concat cake2::app-path "/View/" plural-name "/" action-name ".ctp")))
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" plural-name (concat action-name "." cake2::view-extension)))
+        t)
+       ((cake2::find-file-if-exists (f-join cake2::app-path "View" plural-name (concat action-name ".ctp")))
+        t)
 
        ((y-or-n-p "Make new file?")
-        (unless (file-directory-p (concat cake2::app-path "/View/" plural-name "/"))
-          (make-directory (concat cake2::app-path "/View/" plural-name "/")))
-        (find-file (concat cake2::app-path "/View/" plural-name "/" action-name "." cake2::view-extension)))
-       (t (message (format "Can't find %s" (concat cake2::app-path "/View/" plural-name "/" action-name "." cake2::view-extension))))))))
+        (unless (f-dir? (f-join cake2::app-path "View" plural-name))
+          (make-directory (f-join cake2::app-path "View" plural-name)))
+        (find-file (f-join cake2::app-path "View" plural-name (concat action-name "." cake2::view-extension))))
+       (t (message (format "Can't find %s" (f-join cake2::app-path "View" plural-name (concat action-name "." cake2::view-extension)))))))))
 
 (defun anything-c-cake2::switch-to-controller ()
   "Switch to contoroller."
   (cake2::set-app-path)
-  (if (file-exists-p (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
+  (if (f-exists? (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
       (progn
-        (find-file (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
+        (find-file (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
         (goto-char (point-min))
         (if (not (re-search-forward (concat "function[ \t]*" cake2::lower-camelized-action-name "[ \t]*\(") nil t))
             (progn
               (goto-char (point-min))
               (re-search-forward (concat "function[ \t]*" cake2::action-name "[ \t]*\(") nil t))))
-    (if (file-exists-p (concat cake2::app-path cake2::plural-name "Controller.php"))
+    (if (f-exists? (f-join cake2::app-path (concat cake2::plural-name "Controller.php")))
         (progn
-          (find-file (concat cake2::app-path cake2::plural-name "Controller.php"))
+          (find-file (f-join cake2::app-path (concat cake2::plural-name "Controller.php")))
           (goto-char (point-min))
           (if (not (re-search-forward (concat "function[ \t]*" cake2::lower-camelized-action-name "[ \t]*\(") nil t))
               (progn
                 (goto-char (point-min))
                 (re-search-forward (concat "function[ \t]*" cake2::action-name "[ \t]*\(") nil t))))
       (if (y-or-n-p "Make new file?")
-          (find-file (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php"))
-        (message (format "Can't find %s" (concat cake2::app-path "/Controller/" cake2::plural-name "Controller.php")))))))
+          (find-file (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
+        (message (format "Can't find %s" (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php"))))))))
 
 (defun anything-c-cake2::switch-to-model ()
   "Switch to model."
   (cake2::set-app-path)
-  (if (file-exists-p (concat cake2::app-path "/Model/" cake-camelize-name ".php"))
-      (find-file (concat cake2::app-path "/Model/" cake-camelize-name ".php"))
-    (if (file-exists-p (concat cake2::app-path "/Model/" cake2::singular-name ".php"))
-        (find-file (concat cake2::app-path "/Model/" cake2::singular-name ".php"))
+  (unless (cake2::find-file-if-exists (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
+    (unless (cake2::find-file-if-exists (f-join cake2::app-path "Model" (concat cake2::singular-name ".php")))
       (if (y-or-n-p "Make new file?")
-          (find-file (concat cake2::app-path "/Model/" cake-camelize-name ".php"))
-        (message (format "Can't find %s" (concat cake2::app-path "/Model/" cake-camelize-name ".php")))))))
+          (find-file (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
+        (message (format "Can't find %s" (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php"))))))))
 
 (defun anything-c-cake2::switch-to-file-function (dir)
   "Switch to file and search function."
   (cake2::set-app-path)
-  (if (not (file-exists-p (concat cake2::app-path dir cake-camelize-name ".php")))
+  (if (not (f-exists? (f-join cake2::app-path dir (concat cake2::camelize-name ".php"))))
       (if (y-or-n-p "Make new file?")
-          (find-file (concat cake2::app-path dir cake-camelize-name ".php"))
-        (message (format "Can't find %s" (concat cake2::app-path dir cake-camelize-name ".php"))))
-    (find-file (concat cake2::app-path dir cake-camelize-name ".php"))
+          (find-file (f-join cake2::app-path dir (concat cake2::camelize-name ".php")))
+        (message (format "Can't find %s" (f-join cake2::app-path dir (concat cake2::camelize-name ".php")))))
+    (find-file (f-join cake2::app-path dir (concat cake2::camelize-name ".php")))
     (goto-char (point-min))
     (re-search-forward (concat "function[ \t]*" cake2::candidate-function-name "[ \t]*\(") nil t)))
 
@@ -1356,18 +1332,18 @@
 (defun anything-c-cake2::set-names2 (candidate)
   "Set names by display-to-real"
   (string-match "\\(.+\\)->\\(.+\\)" candidate)
-  (setq cake-camelized-singular-name (match-string 1 candidate))
-  (setq cake-camelize-name cake-camelized-singular-name)
+  (setq cake2::camelized-singular-name (match-string 1 candidate))
+  (setq cake2::camelize-name cake2::camelized-singular-name)
   (setq cake2::candidate-function-name (match-string 2 candidate))
-  (setq cake2::singular-name (cake-snake cake-camelized-singular-name))
+  (setq cake2::singular-name (cake-snake cake2::camelized-singular-name))
   candidate)
 
 (defun anything-c-cake2::create-po-file-buffer ()
   "Create buffer from po file."
   (let ((anything-buffer (anything-candidate-buffer 'global)))
     (catch 'invalid-po-file
-      (unless (anything-c-cake2::generate-po-file-buffer (concat cake2::app-path "/Locale/" cake2::po-file-path))
-        (message "Can't find po file: %s" (concat cake2::app-path "/Locale/" cake2::po-file-path))
+      (unless (anything-c-cake2::generate-po-file-buffer (f-join cake2::app-path "Locale" cake2::po-file-path))
+        (message "Can't find po file: %s" (f-join cake2::app-path "Locale" cake2::po-file-path))
         (throw 'invalid-po-file nil))
       (with-current-buffer anything-buffer
         (set-syntax-table (with-current-buffer anything-current-buffer
@@ -1429,7 +1405,7 @@
      ("Insert msgid." . (lambda (candidate)
                           (insert candidate)))
      ("Goto po file" . (lambda (candidate)
-                         (find-file (concat path "/Locale/" cake2::po-file-path))
+                         (find-file (f-join path "Locale" cake2::po-file-path))
                          (goto-char (point-max)))))))
 
 (defun anything-c-cake2::get-msgid (candidate)
@@ -1476,7 +1452,7 @@
               initial-pattern "Find Msgid And Msgstr: " nil)))
 
 (defconst cake2::snippets-dir (file-name-directory (or (buffer-file-name)
-                                                    load-file-name)))
+                                                       load-file-name)))
 
 ;;;###autoload
 (defun cake2::snippets-initialize ()
@@ -1486,7 +1462,7 @@
 
 ;;;###autoload
 (eval-after-load 'yasnippet
-   '(cake2::snippets-initialize))
+  '(cake2::snippets-initialize))
 
 ;; Tests
 (dont-compile
