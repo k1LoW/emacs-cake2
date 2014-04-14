@@ -65,7 +65,7 @@
 ;;  `cake2::switch-to-function'
 ;;    Switch to function.
 ;;  `cake2::switch-to-element'
-;;    Switch to element. If region is active, make new element file.
+;;    Switch to element.  If region is active, make new element file.
 ;;  `cake2::switch-to-js'
 ;;    Switch to js.
 ;;  `cake2::switch-to-css'
@@ -73,13 +73,13 @@
 ;;  `cake2::switch'
 ;;    Omni switch function.
 ;;  `cake2::switch-testcase'
-;;    Switch testcase <-> C/M. Or, switch form fixture to testcase.
+;;    Switch testcase <-> C/M.  Or, switch form fixture to testcase.
 ;;  `cake2::switch-to-file-history'
 ;;    Switch to file history.
 ;;  `cake2::open-dirs'
-;;    Open directory.
+;;    Open DIR.
 ;;  `cake2::open-model-dirs'
-;;    Open model directories.
+;;    Open model directries.
 ;;  `cake2::open-view-dirs'
 ;;    Open view directories.
 ;;  `cake2::open-all-views-dir'
@@ -101,9 +101,9 @@
 ;;  `cake2::open-element-dirs'
 ;;    Open element directories.
 ;;  `cake2::open-js-dir'
-;;    Open J directories.
+;;    Open Js directories.
 ;;  `cake2::open-css-dir'
-;;    Open cs directories.
+;;    Open css directories.
 ;;  `cake2::open-test-dirs'
 ;;    Open test directories.
 ;;  `cake2::set-version'
@@ -330,38 +330,38 @@
   "Set default key-map."
   (setq cake2::key-map
         (let ((map (make-sparse-keymap)))
-          (define-key map "\C-cs" 'cake2::switch)
-          (define-key map "\C-ct" 'cake2::switch-testcase)
-          (define-key map "\C-cm" 'cake2::switch-to-model)
-          (define-key map "\C-cv" 'cake2::switch-to-view)
-          (define-key map "\C-cc" 'cake2::switch-to-controller)
-          (define-key map "\C-cx" 'cake2::switch-to-fixture)
-          (define-key map "\C-cf" 'cake2::switch-to-function)
-          (define-key map "\C-ce" 'cake2::switch-to-element)
-          (define-key map "\C-cj" 'cake2::switch-to-js)
-          (define-key map "\C-cb" 'cake2::switch-to-file-history)
-          (define-key map "\C-cM" 'cake2::open-model-dirs)
-          (define-key map "\C-cV" 'cake2::open-view-dirs)
-          (define-key map "\C-u\C-cV" 'cake2::open-all-views-dir)
-          (define-key map "\C-c\C-l" 'cake2::open-layout-dirs)
-          (define-key map "\C-cC" 'cake2::open-controllers-dir)
-          (define-key map "\C-cB" 'cake2::open-behaviors-dir)
-          (define-key map "\C-cH" 'cake2::open-helpers-dir)
-          (define-key map "\C-cP" 'cake2::open-components-dir)
-          (define-key map "\C-cL" 'cake2::open-libs-dir)
-          (define-key map "\C-cE" 'cake2::open-element-dirs)
-          (define-key map "\C-cJ" 'cake2::open-js-dir)
-          (define-key map "\C-cS" 'cake2::open-css-dir)
-          (define-key map "\C-cT" 'cake2::open-test-dirs)
-          (define-key map "\C-c\C-g" 'cake2::open-config-dir)
-          (define-key map "\C-c\C-t" 'cake2::tail-log)
-          ;; anything-functions
-          (define-key map "\C-cl" 'anything-c-cake2-anything-only-source-cake2)
-          (define-key map "\C-co" 'anything-c-cake2-anything-only-function)
-          (define-key map "\C-cp" 'anything-c-cake2-anything-only-po)
+          (define-key map (kbd "C-c s") 'cake2::switch)
+          (define-key map (kbd "C-c t") 'cake2::switch-testcase)
+          (define-key map (kbd "C-c m") 'cake2::switch-to-model)
+          (define-key map (kbd "C-c v") 'cake2::switch-to-view)
+          (define-key map (kbd "C-c c") 'cake2::switch-to-controller)
+          (define-key map (kbd "C-c x") 'cake2::switch-to-fixture)
+          (define-key map (kbd "C-c f") 'cake2::switch-to-function)
+          (define-key map (kbd "C-c e") 'cake2::switch-to-element)
+          (define-key map (kbd "C-c j") 'cake2::switch-to-js)
+          (define-key map (kbd "C-c b") 'cake2::switch-to-file-history)
+          (define-key map (kbd "C-c M") 'cake2::open-model-dirs)
+          (define-key map (kbd "C-c V") 'cake2::open-view-dirs)
+          (define-key map (kbd "C-u C-c V") 'cake2::open-all-views-dir)
+          (define-key map (kbd "C-c C-l") 'cake2::open-layout-dirs)
+          (define-key map (kbd "C-c C") 'cake2::open-controllers-dir)
+          (define-key map (kbd "C-c B") 'cake2::open-behaviors-dir)
+          (define-key map (kbd "C-c H") 'cake2::open-helpers-dir)
+          (define-key map (kbd "C-c P") 'cake2::open-components-dir)
+          (define-key map (kbd "C-c L") 'cake2::open-libs-dir)
+          (define-key map (kbd "C-c E") 'cake2::open-element-dirs)
+          (define-key map (kbd "C-c J") 'cake2::open-js-dir)
+          (define-key map (kbd "C-c S") 'cake2::open-css-dir)
+          (define-key map (kbd "C-c T") 'cake2::open-test-dirs)
+          (define-key map (kbd "C-c C-g") 'cake2::open-config-dir)
+          (define-key map (kbd "C-c C-t") 'cake2::tail-log)
+          ;; anything-functions   
+          (define-key map (kbd "C-c l") 'anything-c-cake2-anything-only-source-cake2)
+          (define-key map (kbd "C-c o") 'anything-c-cake2-anything-only-function)
+          (define-key map (kbd "C-c p") 'anything-c-cake2-anything-only-po)
           map)))
 
-(defun cake2::is-model-file ()
+(defun cake2::model-file? ()
   "Check whether current file is model file."
   (cake2::app-build)
   (if (not (string-match cake2::model-regexp (buffer-file-name)))
@@ -371,7 +371,7 @@
     (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'model)))
 
-(defun cake2::is-view-file ()
+(defun cake2::view-file? ()
   "Check whether current file is view file."
   (cake2::app-build)
   (setq cake2::themed-name nil)
@@ -395,7 +395,7 @@
       (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
       (setq cake2::current-file-type 'view))))
 
-(defun cake2::is-controller-file ()
+(defun cake2::controller-file? ()
   "Check whether current file is contoroller file."
   (cake2::app-build)
   (if (not (string-match cake2::controller-regexp (buffer-file-name)))
@@ -417,28 +417,28 @@
     (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'controller)))
 
-(defun cake2::is-behavior-file ()
+(defun cake2::behavior-file? ()
   "Check whether current file is Behavior file."
   (cake2::app-build)
   (if (not (string-match cake2::behavior-regexp (buffer-file-name)))
       nil
     (setq cake2::current-file-type 'behavior)))
 
-(defun cake2::is-helper-file ()
+(defun cake2::helper-file? ()
   "Check whether current file is Helper file."
   (cake2::app-build)
   (if (not (string-match cake2::helper-regexp (buffer-file-name)))
       nil
     (setq cake2::current-file-type 'helper)))
 
-(defun cake2::is-component-file ()
+(defun cake2::component-file? ()
   "Check whether current file is Component file."
   (cake2::app-build)
   (if (not (string-match cake2::component-regexp (buffer-file-name)))
       nil
     (setq cake2::current-file-type 'component)))
 
-(defun cake2::is-model-testcase-file ()
+(defun cake2::model-testcase-file? ()
   "Check whether current file is model testcase file."
   (cake2::app-build)
   (if (not (string-match cake2::model-testcase-regexp (buffer-file-name)))
@@ -448,7 +448,7 @@
     (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'model-testcase)))
 
-(defun cake2::is-controller-testcase-file ()
+(defun cake2::controller-testcase-file? ()
   "Check whether current file is controller testcase file."
   (cake2::app-build)
   (if (not (string-match cake2::controller-testcase-regexp (buffer-file-name)))
@@ -458,7 +458,7 @@
     (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'controller-testcase)))
 
-(defun cake2::is-fixture-file ()
+(defun cake2::fixture-file? ()
   "Check whether current file is fixture file."
   (cake2::app-build)
   (if (not (string-match cake2::fixture-regexp (buffer-file-name)))
@@ -468,33 +468,33 @@
     (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
     (setq cake2::current-file-type 'fixture)))
 
-(defun cake2::is-js-file ()
+(defun cake2::js-file? ()
   "Check whether current file is Js file."
   (cake2::app-build)
   (if (not (string-match cake2::js-regexp (buffer-file-name)))
       nil
     (setq cake2::current-file-type 'js)))
 
-(defun cake2::is-css-file ()
+(defun cake2::css-file? ()
   "Check whether current file is Js file."
   (cake2::app-build)
   (if (not (string-match cake2::css-regexp (buffer-file-name)))
       nil
     (setq cake2::current-file-type 'css)))
 
-(defun cake2::is-file ()
+(defun cake2::file? ()
   "Check whether current file is CakePHP2's file."
-  (if (or (cake2::is-model-file)
-          (cake2::is-controller-file)
-          (cake2::is-view-file)
-          (cake2::is-behavior-file)
-          (cake2::is-helper-file)
-          (cake2::is-component-file)
-          (cake2::is-js-file)
-          (cake2::is-css-file)
-          (cake2::is-model-testcase-file)
-          (cake2::is-controller-testcase-file)
-          (cake2::is-fixture-file))
+  (if (or (cake2::model-file?)
+          (cake2::controller-file?)
+          (cake2::view-file?)
+          (cake2::behavior-file?)
+          (cake2::helper-file?)
+          (cake2::component-file?)
+          (cake2::js-file?)
+          (cake2::css-file?)
+          (cake2::model-testcase-file?)
+          (cake2::controller-testcase-file?)
+          (cake2::fixture-file?))
       t nil))
 
 (defun cake2::get-current-line ()
@@ -589,8 +589,8 @@
 (defun cake2::switch-to-model ()
   "Switch to model."
   (interactive)
-  (cake2::is-file)
-  (if (cake2::is-file)
+  (cake2::file?)
+  (if (cake2::file?)
       (cake2::switch-to-file (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
     (message "Can't find model name.")))
 
@@ -598,10 +598,10 @@
   "Switch to view."
   (interactive)
   (let ((view-files nil))
-    (if (and (cake2::is-file)
+    (if (and (cake2::file?)
              cake2::action-name)
         (progn
-          (if (cake2::is-model-file)
+          (if (cake2::model-file?)
               (setq cake2::plural-name (cake-pluralize cake2::singular-name)))
           (setq view-files (cake2::set-view-list))
           (if view-files
@@ -650,7 +650,7 @@
 (defun cake2::switch-to-controller ()
   "Switch to contoroller."
   (interactive)
-  (if (cake2::is-file)
+  (if (cake2::file?)
       (progn
         (if (f-exists? (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
             (progn
@@ -669,21 +669,21 @@
 (defun cake2::switch-to-model-testcase ()
   "Switch to model testcase."
   (interactive)
-  (if (cake2::is-file)
+  (if (cake2::file?)
       (cake2::switch-to-file (f-join cake2::app-path "Test/Case/Model" (concat cake2::singular-name "Test.php")))
     (message "Can't switch to model testcase.")))
 
 (defun cake2::switch-to-controller-testcase ()
   "Switch to contoroller testcase."
   (interactive)
-  (if (cake2::is-file)
+  (if (cake2::file?)
       (cake2::switch-to-file (f-join cake2::app-path "Test/Case/Controller" (concat cake2::plural-name "ControllerTest.php")))
     (message "Can't switch to contoroller testcase.")))
 
 (defun cake2::switch-to-fixture ()
   "Switch to fixture."
   (interactive)
-  (if (cake2::is-file)
+  (if (cake2::file?)
       (cake2::switch-to-file (f-join cake2::app-path "Test/Fixture" (cake2::singular-name "Fixture.php")))
     (message "Can't switch to fixture.")))
 
@@ -717,9 +717,9 @@
     (if (and cake2::use-imenu
              (require 'imenu nil t))
         (anything 'anything-c-source-imenu)
-      (if (or (cake2::is-controller-file)
-              (cake2::is-model-file)
-              (cake2::is-js-file))
+      (if (or (cake2::controller-file?)
+              (cake2::model-file?)
+              (cake2::js-file?))
           (progn
             (setq current-func (cake2::search-functions))
             (anything
@@ -740,7 +740,7 @@
   "Switch to element.  If region is active, make new element file."
   (interactive)
   (let ((element-name nil) (themed-path ""))
-    (if (cake2::is-view-file)
+    (if (cake2::view-file?)
         (progn
           (unless (not cake2::themed-name)
             (setq themed-path (f-join "Themed" cake2::themed-name)))
@@ -816,20 +816,20 @@
        ((or (string-match "$html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))
             (string-match "$this->Html->css( *['\"]\\([-a-zA-Z0-9_/\.]+\\)['\"].*" (cake2::get-current-line))) (cake2::switch-to-css))
        ;;cake2::switch-to-controller
-       ((cake2::is-view-file) (cake2::switch-to-controller))
+       ((cake2::view-file?) (cake2::switch-to-controller))
        ;;cake2::switch-to-view
-       ((cake2::is-controller-file) (cake2::switch-to-view))
+       ((cake2::controller-file?) (cake2::switch-to-view))
        (t (message "Current buffer is neither view nor controller.")))
     (message "Can't set app path.")))
 
 (defun cake2::switch-testcase ()
   "Switch testcase <-> C/M.  Or, switch form fixture to testcase."
   (interactive)
-  (cond ((cake2::is-model-file) (cake2::switch-to-model-testcase))
-        ((cake2::is-controller-file) (cake2::switch-to-controller-testcase))
-        ((cake2::is-model-testcase-file) (cake2::switch-to-model))
-        ((cake2::is-controller-testcase-file) (cake2::switch-to-controller))
-        ((cake2::is-fixture-file) (cake2::switch-to-model-testcase))
+  (cond ((cake2::model-file?) (cake2::switch-to-model-testcase))
+        ((cake2::controller-file?) (cake2::switch-to-controller-testcase))
+        ((cake2::model-testcase-file?) (cake2::switch-to-model))
+        ((cake2::controller-testcase-file?) (cake2::switch-to-controller))
+        ((cake2::fixture-file?) (cake2::switch-to-model-testcase))
         (t (message "Current buffer is neither model nor controller."))))
 
 (defun cake2::switch-to-file-history ()
@@ -889,7 +889,7 @@
   "Open view directories."
   (interactive)
   (let ((themed-list (cake2::find-themed-dirs)) (plugin-list (cake2::find-plugin-dirs)))
-    (if (not (or (cake2::is-model-file) (cake2::is-controller-file) (cake2::is-view-file)))
+    (if (not (or (cake2::model-file?) (cake2::controller-file?) (cake2::view-file?)))
         (cake2::open-all-views-dir)
       (setq themed-list (mapcar (function (lambda (c) (if c (f-join c cake2::plural-name) nil))) themed-list))
       (push (f-join "View" cake2::plural-name) themed-list)
@@ -1125,12 +1125,12 @@
   (interactive)
   (if (cake2::app-build)
       (cond
-       ((cake2::is-controller-file)
+       ((cake2::controller-file?)
         (anything
          '(cake2::source-layouts
            cake2::source-models)
          (cake2::get-initial-input) "Find Code: " nil))
-       ((cake2::is-view-file)
+       ((cake2::view-file?)
         (anything
          '(cake2::source-js
            cake2::source-css
@@ -1235,7 +1235,7 @@
         (snake-action-name cake2::snake-action-name))
     (progn
       (cake2::app-build)
-      (if (and (cake2::is-view-file) cake2::themed-name)
+      (if (and (cake2::view-file?) cake2::themed-name)
           (setq themed-dir (f-join "Themed" cake2::themed-name)))
       (cond
        ((cake2::find-file-if-exists (f-join cake2::app-path "View" themed-dir plural-name (concat snake-action-name "." cake2::view-extension)))
