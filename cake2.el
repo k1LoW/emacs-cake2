@@ -80,29 +80,29 @@
 ;;    Open DIR.
 ;;  `cake2::open-model-dirs'
 ;;    Open model directries.
-;;  `cake2::open-view-dirs'
+;;  `cake2::open-view-focused-dirs'
 ;;    Open view directories.
-;;  `cake2::open-all-views-dir'
+;;  `cake2::open-view-dirs'
 ;;    Open all view directories.
-;;  `cake2::open-controllers-dir'
+;;  `cake2::open-controller-dirs'
 ;;    Open controller directories.
-;;  `cake2::open-behaviors-dir'
+;;  `cake2::open-behavior-dirs'
 ;;    Open behavior directories.
-;;  `cake2::open-helpers-dir'
+;;  `cake2::open-helper-dirs'
 ;;    Open helper directories.
-;;  `cake2::open-components-dir'
+;;  `cake2::open-component-dirs'
 ;;    Open component directories.
-;;  `cake2::open-libs-dir'
+;;  `cake2::open-lib-dirs'
 ;;    Open libs dir.
-;;  `cake2::open-config-dir'
+;;  `cake2::open-config-dirs'
 ;;    Open config dir.
 ;;  `cake2::open-layout-dirs'
 ;;    Open layout directories.
 ;;  `cake2::open-element-dirs'
 ;;    Open element directories.
-;;  `cake2::open-js-dir'
+;;  `cake2::open-js-dirs'
 ;;    Open Js directories.
-;;  `cake2::open-css-dir'
+;;  `cake2::open-css-dirs'
 ;;    Open css directories.
 ;;  `cake2::open-test-dirs'
 ;;    Open test directories.
@@ -242,45 +242,6 @@
 (defvar cake2::themed-name nil
   "CakePHP2 current view themed name.")
 
-(defvar cake2::model-dirs nil
-  "Model directories.")
-
-(defvar cake2::view-dirs nil
-  "View directories.")
-
-(defvar cake2::themed-dirs nil
-  "View directories.")
-
-(defvar cake2::controller-dirs nil
-  "Contoroller directories.")
-
-(defvar cake2::behavior-dirs nil
-  "Behavior directories.")
-
-(defvar cake2::helper-dirs nil
-  "Helper directories.")
-
-(defvar cake2::component-dirs nil
-  "Component directories.")
-
-(defvar cake2::model-testcase-dirs nil
-  "Model testcase directories.")
-
-(defvar cake2::controller-testcase-dirs nil
-  "Contoroller testcase directories.")
-
-(defvar cake2::fixture-dirs nil
-  "Fixture directories.")
-
-(defvar cake2::js-dirs nil
-  "JavaScript directories.")
-
-(defvar cake2::css-dirs nil
-  "Css directories.")
-
-(defvar cake2::plugin-dirs nil
-  "Plugin directories.")
-
 (defvar cake2::model-regexp "^.+/app/Model/\\([^/]+\\)\.php$"
   "Model file regExp.")
 
@@ -341,19 +302,19 @@
           (define-key map (kbd "C-c j") 'cake2::switch-to-js)
           (define-key map (kbd "C-c b") 'cake2::switch-to-file-history)
           (define-key map (kbd "C-c M") 'cake2::open-model-dirs)
-          (define-key map (kbd "C-c V") 'cake2::open-view-dirs)
-          (define-key map (kbd "C-u C-c V") 'cake2::open-all-views-dir)
+          (define-key map (kbd "C-c V") 'cake2::open-view-focused-dirs)
+          (define-key map (kbd "C-u C-c V") 'cake2::open-view-dirs)
           (define-key map (kbd "C-c C-l") 'cake2::open-layout-dirs)
-          (define-key map (kbd "C-c C") 'cake2::open-controllers-dir)
-          (define-key map (kbd "C-c B") 'cake2::open-behaviors-dir)
-          (define-key map (kbd "C-c H") 'cake2::open-helpers-dir)
-          (define-key map (kbd "C-c P") 'cake2::open-components-dir)
-          (define-key map (kbd "C-c L") 'cake2::open-libs-dir)
+          (define-key map (kbd "C-c C") 'cake2::open-controller-dirs)
+          (define-key map (kbd "C-c B") 'cake2::open-behavior-dirs)
+          (define-key map (kbd "C-c H") 'cake2::open-helper-dirs)
+          (define-key map (kbd "C-c P") 'cake2::open-component-dirs)
+          (define-key map (kbd "C-c L") 'cake2::open-lib-dirs)
           (define-key map (kbd "C-c E") 'cake2::open-element-dirs)
-          (define-key map (kbd "C-c J") 'cake2::open-js-dir)
-          (define-key map (kbd "C-c S") 'cake2::open-css-dir)
+          (define-key map (kbd "C-c J") 'cake2::open-js-dirs)
+          (define-key map (kbd "C-c S") 'cake2::open-css-dirs)
           (define-key map (kbd "C-c T") 'cake2::open-test-dirs)
-          (define-key map (kbd "C-c C-g") 'cake2::open-config-dir)
+          (define-key map (kbd "C-c C-g") 'cake2::open-config-dirs)
           (define-key map (kbd "C-c C-t") 'cake2::tail-log)
           ;; anything-functions   
           (define-key map (kbd "C-c l") 'anything-c-cake2-anything-only-source-cake2)
@@ -867,162 +828,151 @@
 (defun cake2::directory-files (dir &optional recursive)
   "Get DIR files. If RECURSIVE = true, get DIR recuresively."
   (-map
-   (lambda (file) (f-relative file (f-join cake2::app-path dir)))
+   (lambda (file) (f-relative file (f-expand dir cake2::app-path)))
    (f-files (f-join cake2::app-path dir) (lambda (file) (not (s-matches? "\\.svn" (f-long file)))) recursive)))
 
-(defun cake2::build-model-files ()
-    ".cakeから"
-    (let ((dirs (cake2::find-plugin-dirs)))
-        (setq dirs (-map (lambda (dir) (if dir (f-join dir "Model") nil))) dirs)
-        (push "Model" dirs)
-        (cake2::open-dirs dirs t "Behavior\\|Datasource")))
+(defun cake2::build-dirs (key &optional extra-dirs)
+  "Build KEY directories list."
+  (let* ((dirs (ht-get cake2::build-pathes key)))
+    (setq dirs (-union dirs (-map (lambda (dir) (if dir (f-join dir key) nil)) extra-dirs)))
+    dirs))
 
 (defun cake2::open-model-dirs ()
-  "Open model directries."
+  "Open model directries. Model/ and Plugin/**/Model/"
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Model") nil))) plugin-list))
-    (push "Model" plugin-list)
-    (cake2::open-dirs plugin-list t "Behavior\\|Datasource")))
+  (let ((recursive t)
+         (ignore "Behavior\\|Datasource"))
+    (cake2::open-dirs (cake2::build-dirs "Model" (cake2::find-plugin-dirs)) recursive ignore)))
+
+(defun cake2::build-view-focused-dirs (&optional name)
+  "Build focused view directories list."
+  (let ((view-dirs (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs)))))
+    (unless name
+      (setq name cake2::plural-name))
+    (-flatten (-map (lambda (dir) (unless (not (f-dir? (f-expand (f-join dir name) cake2::app-path)))
+                          (f-expand (f-join dir name) cake2::app-path))) view-dirs))))
+
+(defun cake2::open-view-focused-dirs ()
+  "Open view focused directories."
+  (interactive)
+  (let ((recursive t)
+         (ignore "Helper"))
+    (unless (or (cake2::model-file?) (cake2::controller-file?) (cake2::view-file?))
+      (cake2::open-view-dirs))
+    (cake2::open-dirs (cake2::build-view-focused-dirs cake2::plural-name) recursive ignore)))
 
 (defun cake2::open-view-dirs ()
   "Open view directories."
   (interactive)
-  (let ((themed-list (cake2::find-themed-dirs)) (plugin-list (cake2::find-plugin-dirs)))
-    (if (not (or (cake2::model-file?) (cake2::controller-file?) (cake2::view-file?)))
-        (cake2::open-all-views-dir)
-      (setq themed-list (mapcar (function (lambda (c) (if c (f-join c cake2::plural-name) nil))) themed-list))
-      (push (f-join "View" cake2::plural-name) themed-list)
-      (cake2::open-dirs themed-list))))
+  (let ((recursive t)
+         (ignore "Helper"))
+    (cake2::open-dirs (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs))) recursive ignore)))
 
-(defun cake2::open-all-views-dir ()
-  "Open all view directories."
-  (interactive)
-  (let ((themed-list (cake2::find-themed-dirs)) (plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View") nil))) plugin-list))
-    (push "View" plugin-list)
-    (cake2::open-dirs plugin-list t "Helper")))
-
-(defun cake2::open-controllers-dir ()
+(defun cake2::open-controller-dirs ()
   "Open controller directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs))
-        (controller-list (cake2::find-controller-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Controller") nil))) plugin-list))
-    (setq controller-list (append controller-list plugin-list))
-    (push "Controller" controller-list)
-    (cake2::open-dirs (remove-if (lambda (x) (string-match "Component" x)) controller-list) t "Component")))
+  (let ((recursive t)
+         (ignore "Component"))
+    (cake2::open-dirs (cake2::build-dirs "Controller" (cake2::find-plugin-dirs)) recursive ignore)))
 
-(defun cake2::open-behaviors-dir ()
+(defun cake2::open-behavior-dirs ()
   "Open behavior directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Model/Behavior") nil))) plugin-list))
-    (push "Model/Behavior" plugin-list)
-    (cake2::open-dirs plugin-list)))
+  (let ((recursive t)
+         (ignore nil))
+    (cake2::open-dirs (cake2::build-dirs "Behavior" (cake2::find-plugin-dirs)) recursive ignore)))
 
-(defun cake2::open-helpers-dir ()
+(defun cake2::open-helper-dirs ()
   "Open helper directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Helper") nil))) plugin-list))
-    (push "View/Helper" plugin-list)
-    (cake2::open-dirs plugin-list)))
+  (let ((recursive t)
+         (ignore nil))
+    (cake2::open-dirs (cake2::build-dirs "Helper" (cake2::find-plugin-dirs)) recursive ignore)))
 
-(defun cake2::open-components-dir ()
+(defun cake2::open-component-dirs ()
   "Open component directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Controller/Component") nil))) plugin-list))
-    (push "Controller/Component" plugin-list)
-    (cake2::open-dirs plugin-list)))
+  (let ((recursive t)
+         (ignore nil))
+    (cake2::open-dirs (cake2::build-dirs "Component" (cake2::find-plugin-dirs)) recursive ignore)))
 
-(defun cake2::open-libs-dir ()
-  "Open libs dir."
+(defun cake2::open-lib-dirs ()
+  "Open lib directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Lib") nil))) plugin-list))
-    (push "Lib" plugin-list)
-    (cake2::open-dirs plugin-list t)))
+  (let ((recursive t)
+         (ignore nil))
+    (cake2::open-dirs (cake2::build-dirs "Lib" (cake2::find-plugin-dirs)) recursive ignore)))
 
-(defun cake2::open-config-dir ()
-  "Open config dir."
+(defun cake2::build-app-dirs (&optional relative-dirs)
+  "Build webroot directories list."
+  (let ((plugin-dirs (cake2::find-plugin-dirs)))
+    (unless relative-dirs
+      (setq relative-dirs ""))
+    (unless (listp relative-dirs)
+      (setq relative-dirs (list relative-dirs)))
+    (-union
+     (-flatten (-map (lambda (r-dir) (f-join cake2::app-path r-dir)) relative-dirs))
+     (-flatten (-map (lambda (dir) (if dir
+                                       (-map (lambda (r-dir) (f-join dir r-dir)) relative-dirs)
+                                     nil)) plugin-dirs)))))
+
+(defun cake2::open-config-dirs ()
+  "Open Config directories"
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "Config") nil))) plugin-list))
-    (push "Config" plugin-list)
-    (cake2::open-dirs plugin-list t)))
+  (let ((recursive t)
+         (ignore nil))
+    (cake2::open-dirs (cake2::build-app-dirs "Config") recursive ignore)))
 
 (defun cake2::open-layout-dirs ()
   "Open layout directories."
   (interactive)
-  (let ((layouts)
-        (plugin-list (cake2::find-plugin-dirs))
-        (themed-list (cake2::find-themed-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Layouts") nil))) plugin-list))
-    (setq themed-list (mapcar (function (lambda (c) (if c (f-join c "Layouts") nil))) themed-list))
-    (setq layouts (append plugin-list themed-list))
-    (push "View/Layouts" layouts)
-    (cake2::open-dirs layouts t)))
+  (let ((recursive t)
+        (ignore nil))
+    (cake2::open-dirs (cake2::build-view-focused-dirs "Layouts") recursive ignore)))
 
 (defun cake2::open-element-dirs ()
   "Open element directories."
   (interactive)
-  (let ((elements)
-        (plugin-list (cake2::find-plugin-dirs))
-        (themed-list (cake2::find-themed-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "View/Elements") nil))) plugin-list))
-    (setq themed-list (mapcar (function (lambda (c) (if c (f-join c "Elements") nil))) themed-list))
-    (setq elements (append plugin-list themed-list))
-    (push "View/Elements" elements)
-    (cake2::open-dirs elements t)))
+  (let ((recursive t)
+        (ignore nil))
+    (cake2::open-dirs (cake2::build-view-focused-dirs "Elements") recursive ignore)))
 
-(defun cake2::open-js-dir ()
+(defun cake2::open-js-dirs ()
   "Open Js directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "webroot/js") nil))) plugin-list))
-    (push "webroot/js" plugin-list)
-    (cake2::open-dirs plugin-list t)))
+  (let ((recursive t)
+        (ignore nil))
+    (cake2::open-dirs (cake2::build-app-dirs "webroot/js") recursive ignore)))
 
-(defun cake2::open-css-dir ()
+(defun cake2::open-css-dirs ()
   "Open css directories."
   (interactive)
-  (let ((plugin-list (cake2::find-plugin-dirs)))
-    (setq plugin-list (mapcar (function (lambda (c) (if c (f-join c "webroot/css") nil))) plugin-list))
-    (push "webroot/css" plugin-list)
-    (cake2::open-dirs plugin-list t)))
+  (let ((recursive t)
+        (ignore nil))
+    (cake2::open-dirs (cake2::build-app-dirs "webroot/css") recursive ignore)))
 
 (defun cake2::open-test-dirs ()
   "Open test directories."
   (interactive)
-  (let ((tests nil)
-        (plugin-list (cake2::find-plugin-dirs)))
-    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Tests/Group") nil))) plugin-list) tests))
-    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Test/Fixture") nil))) plugin-list) tests))
-    (setq tests (append (mapcar (function (lambda (c) (if c (f-join c "Test/Case") nil))) plugin-list) tests))
-    (push "Tests/Group" tests)
-    (push "Test/Fixture" tests)
-    (push "Test/Case" tests)
-    (cake2::open-dirs tests t)))
+  (let ((recursive t)
+        (ignore nil)
+        (tests `("Tests/Group" "Test/Fixture" "Test/Case")))
+    (cake2::open-dirs (cake2::build-app-dirs tests) recursive ignore)))
+
+(defun cake2::find-plugin-dirs ()
+  "Find plugin directories."
+  (-flatten (-map (lambda (dir)
+                    (if (f-dir? (f-expand dir cake2::app-path))
+                      (f-directories (f-expand dir cake2::app-path))
+                      nil)) (ht-get cake2::build-pathes "Plugin"))))
 
 (defun cake2::find-themed-dirs ()
   "Find themed directory. like app/View/Themed/m"
-  (cake2::find-dirs "View/Themed"))
-
-(defun cake2::find-controller-dirs ()
-  "Find plugin directory. like app/Controller"
-  (remove-if (lambda (x) (string-match "Component" x)) (cake2::find-dirs "Contoller")))
-
-(defun cake2::find-plugin-dirs ()
-  "Find plugin directory. like app/plugins"
-  (cake2::find-dirs "Plugin"))
-
-(defun cake2::find-dirs (dir)
-  "Find directory list."
-  (if (f-dir? (f-join cake2::app-path dir))
-      (f-directories (f-join cake2::app-path dir))
-    nil))
+  (let ((view-dirs (cake2::build-dirs "View" (cake2::find-plugin-dirs))))
+    (-flatten (-map (lambda (dir)
+                      (if (f-dir? (f-expand (f-join dir "Themed") cake2::app-path))
+                        (f-directories (f-expand (f-join dir "Themed") cake2::app-path))
+                        nil)) view-dirs))))
 
 (defvar cake2::source-version
   '((name . "CakePHP2 core version")
@@ -1653,6 +1603,36 @@
       (expect `("Plugin" "../Plugin/")
         (cake2::set-build-pathes)
         (ht-get cake2::build-pathes "Plugin"))
+      (expect '(t t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                      (s-matches? "Model" dir))
+                              t
+                              nil)) (cake2::build-dirs "Model" (cake2::find-plugin-dirs))))
+      (expect '(t t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                      (s-matches? "View" dir))
+                              t
+                              nil)) (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs)))))
+      (expect `(t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                      (s-matches? "Posts" dir))
+                              t
+                              nil)) (cake2::build-view-focused-dirs "Posts")))
+      (expect `(t t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Config" dir))
+                              t
+                              nil)) (cake2::build-app-dirs "Config")))
+      (expect `(t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Layouts" dir))
+                              t
+                              nil)) (cake2::build-view-focused-dirs "Layouts")))
+      (expect `(t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Elements" dir))
+                              t
+                              nil)) (cake2::build-view-focused-dirs "Elements")))
       )))
 
 (provide 'cake2)
