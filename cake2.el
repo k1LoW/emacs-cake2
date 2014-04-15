@@ -334,14 +334,14 @@
   "Inflect NAME"
   (let ((name nil))
     (case file-type
-      (`model
+      ('model
        (unless (not (string-match cake2::model-regexp filename))
           (setq name (match-string 1 filename))
           (setq cake2-singular-name (cake-singularize name))
           (setq cake2::singular-name (cake-singularize name))
           (setq cake2::plural-name (cake-pluralize name))
           (setq cake2::camelize-name (cake-camelize name))))
-      (`view
+      ('view
        (progn
           (unless (not (string-match cake2::themed-regexp filename))
             (setq cake2::themed-name (match-string 1 filename))
@@ -362,7 +362,7 @@
             (setq cake2::singular-name (cake-singularize cake2::plural-name))
             (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name))))
           ))
-      (`controller
+      ('controller
        (unless (not (string-match cake2::controller-regexp filename))
           (setq cake2::plural-name (match-string 1 filename))
           (save-excursion
@@ -378,17 +378,17 @@
               (setq cake2::snake-action-name nil)))
           (setq cake2::singular-name (cake-singularize cake2::plural-name))
           (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
-      (`model-testcase
+      ('model-testcase
        (unless (not (string-match cake2::model-testcase-regexp filename))
          (setq cake2::singular-name (match-string 1 filename))
          (setq cake2::plural-name (cake-pluralize cake2::singular-name))
          (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
-      (`controller-testcase
+      ('controller-testcase
        (unless (not (string-match cake2::controller-testcase-regexp filename))
          (setq cake2::plural-name (match-string 1 filename))
          (setq cake2::singular-name (cake-singularize cake2::plural-name))
          (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
-      (`fixture
+      ('fixture
        (unless (not (string-match cake2::fixture-regexp filename))
            (setq cake2::singular-name (match-string 1 filename))
            (setq cake2::plural-name (cake-pluralize cake2::singular-name))
