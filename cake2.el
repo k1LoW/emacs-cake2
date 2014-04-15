@@ -113,13 +113,13 @@
 ;;  `cake2::tail-log'
 ;;    Show log by "tail".
 ;;  `anything-c-cake2-anything-only-source-cake2'
-;;    anything only anything-c-source-cake2 and anything-c-source-cake2-model-function.
+;;    Anything only anything-c-source-cake2 and anything-c-source-cake2-model-function.
 ;;  `anything-c-cake2-anything-only-function'
-;;    anything only anything-c-source-cake2-function.
+;;    Anything only anything-c-source-cake2-function.
 ;;  `anything-c-cake2-anything-only-model-function'
-;;    anything only anything-c-source-cake2-model-function.
+;;    Anything only anything-c-source-cake2-model-function.
 ;;  `anything-c-cake2-anything-only-po'
-;;    anything only anything-c-source-cake2-po.
+;;    Anything only anything-c-source-cake2-po.
 ;;
 ;;; Customizable Options:
 ;;
@@ -242,6 +242,27 @@
 (defvar cake2::themed-name nil
   "CakePHP2 current view themed name.")
 
+(defvar cake2::default-build-pathes (ht
+                                     ((f-filename "Model") (list "Model" "Lib/Model"))
+                                     ((f-filename "Model/Behavior") (list "Model/Behavior"))
+                                     ((f-filename "Model/Datasource") (list "Model/Datasource"))
+                                     ((f-filename "Model/Datasource/Database") (list "Model/Datasource/Database"))
+                                     ((f-filename "Model/Datasource/Session") (list "Model/Datasource/Session"))
+                                     ((f-filename "Controller") (list "Controller" "Lib/Controller"))
+                                     ((f-filename "Controller/Component") (list "Controller/Component"))
+                                     ((f-filename "Controller/Component/Auth") (list "Controller/Component/Auth"))
+                                     ((f-filename "Controller/Component/Acl") (list "Controller/Component/Acl"))
+                                     ((f-filename "View") (list "View" "Lib/View"))
+                                     ((f-filename "View/Helper") (list "View/Helper"))
+                                     ((f-filename "Console") (list "Console"))
+                                     ((f-filename "Console/Command") (list "Console/Command"))
+                                     ((f-filename "Console/Command/Task") (list "Console/Command/Task"))
+                                     ((f-filename "Lib") (list "Lib"))
+                                     ((f-filename "Locale") (list "Locale"))
+                                     ((f-filename "Vendor") (list "Vendor"))
+                                     ((f-filename "Plugin") (list "Plugin")))
+  "CakePHP2 default build pathes.")
+
 (defvar cake2::model-regexp "^.+/Model/\\([^/]+\\)\.php$"
   "Model file regExp.")
 
@@ -336,48 +357,48 @@
     (case file-type
       ('model
        (unless (not (string-match cake2::model-regexp filename))
-          (setq name (match-string 1 filename))
-          (setq cake2-singular-name (cake-singularize name))
-          (setq cake2::singular-name (cake-singularize name))
-          (setq cake2::plural-name (cake-pluralize name))
-          (setq cake2::camelize-name (cake-camelize name))))
+         (setq name (match-string 1 filename))
+         (setq cake2-singular-name (cake-singularize name))
+         (setq cake2::singular-name (cake-singularize name))
+         (setq cake2::plural-name (cake-pluralize name))
+         (setq cake2::camelize-name (cake-camelize name))))
       ('view
        (progn
-          (unless (not (string-match cake2::themed-regexp filename))
-            (setq cake2::themed-name (match-string 1 filename))
-            (setq cake2::plural-name (match-string 2 filename))
-            (setq cake2::action-name (match-string 4 filename))
-            (setq cake2::view-extension (match-string 5 filename))
-            (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
-            (setq cake2::singular-name (cake-singularize cake2::plural-name))
-            (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
-            (setq cake2::singular-name (cake-singularize name))
-            (setq cake2::plural-name (cake-pluralize name))
-            (setq cake2::camelize-name (cake-camelize name)))
-          (unless (not (string-match cake2::view-regexp filename))
-            (setq cake2::plural-name (match-string 1 filename))
-            (setq cake2::action-name (match-string 3 filename))
-            (setq cake2::view-extension (match-string 4 filename))
-            (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
-            (setq cake2::singular-name (cake-singularize cake2::plural-name))
-            (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name))))
-          ))
+         (unless (not (string-match cake2::themed-regexp filename))
+           (setq cake2::themed-name (match-string 1 filename))
+           (setq cake2::plural-name (match-string 2 filename))
+           (setq cake2::action-name (match-string 4 filename))
+           (setq cake2::view-extension (match-string 5 filename))
+           (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
+           (setq cake2::singular-name (cake-singularize cake2::plural-name))
+           (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))
+           (setq cake2::singular-name (cake-singularize name))
+           (setq cake2::plural-name (cake-pluralize name))
+           (setq cake2::camelize-name (cake-camelize name)))
+         (unless (not (string-match cake2::view-regexp filename))
+           (setq cake2::plural-name (match-string 1 filename))
+           (setq cake2::action-name (match-string 3 filename))
+           (setq cake2::view-extension (match-string 4 filename))
+           (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
+           (setq cake2::singular-name (cake-singularize cake2::plural-name))
+           (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name))))
+         ))
       ('controller
        (unless (not (string-match cake2::controller-regexp filename))
-          (setq cake2::plural-name (match-string 1 filename))
-          (save-excursion
-            (if (cond
-                 ((re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
-                 ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
-                (progn
-                  (setq cake2::action-name (match-string 1))
-                  (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
-                  (setq cake2::snake-action-name (cake-snake cake2::action-name)))
-              (setq cake2::action-name nil)
-              (setq cake2::lower-camelized-action-name nil)
-              (setq cake2::snake-action-name nil)))
-          (setq cake2::singular-name (cake-singularize cake2::plural-name))
-          (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
+         (setq cake2::plural-name (match-string 1 filename))
+         (save-excursion
+           (if (cond
+                ((re-search-backward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t))
+                ((re-search-forward "function[ \t]*\\([a-zA-Z0-9_]+\\)[ \t]*\(" nil t)))
+               (progn
+                 (setq cake2::action-name (match-string 1))
+                 (setq cake2::lower-camelized-action-name (cake-lower-camelize cake2::action-name))
+                 (setq cake2::snake-action-name (cake-snake cake2::action-name)))
+             (setq cake2::action-name nil)
+             (setq cake2::lower-camelized-action-name nil)
+             (setq cake2::snake-action-name nil)))
+         (setq cake2::singular-name (cake-singularize cake2::plural-name))
+         (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
       ('model-testcase
        (unless (not (string-match cake2::model-testcase-regexp filename))
          (setq cake2::singular-name (match-string 1 filename))
@@ -390,14 +411,14 @@
          (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
       ('fixture
        (unless (not (string-match cake2::fixture-regexp filename))
-           (setq cake2::singular-name (match-string 1 filename))
-           (setq cake2::plural-name (cake-pluralize cake2::singular-name))
-           (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
+         (setq cake2::singular-name (match-string 1 filename))
+         (setq cake2::plural-name (cake-pluralize cake2::singular-name))
+         (setq cake2::camelize-name (cake-camelize (cake-snake cake2::singular-name)))))
       )
     t))
 
 (defun cake2::model-file? ()
-  "Check whether current file is model file."
+  "Check whether current file is Model file."
   (cake2::app-build)
   (let ((filename (buffer-file-name))
         (model-dirs (cake2::build-dirs "Model" (cake2::find-plugin-dirs)))
@@ -407,7 +428,7 @@
       (cake2::inflect-name filename cake2::current-file-type))))
 
 (defun cake2::view-file? ()
-  "Check whether current file is view file."
+  "Check whether current file is View file."
   (cake2::app-build)
   (let ((filename (buffer-file-name))
         (view-dirs (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs))))
@@ -418,7 +439,7 @@
       (cake2::inflect-name filename cake2::current-file-type))))
 
 (defun cake2::controller-file? ()
-  "Check whether current file is contoroller file."
+  "Check whether current file is Contoroller file."
   (cake2::app-build)
   (let ((filename (buffer-file-name))
         (controller-dirs (cake2::build-dirs "Controller" (cake2::find-plugin-dirs)))
@@ -455,7 +476,7 @@
       (setq cake2::current-file-type 'component))))
 
 (defun cake2::model-testcase-file? ()
-  "Check whether current file is model testcase file."
+  "Check whether current file is Model testcase file."
   (cake2::app-build)
   (let ((filename (buffer-file-name)))
     (unless (not (string-match cake2::model-testcase-regexp filename))
@@ -463,7 +484,7 @@
       (cake2::inflect-name filename cake2::current-file-type))))
 
 (defun cake2::controller-testcase-file? ()
-  "Check whether current file is controller testcase file."
+  "Check whether current file is Controller testcase file."
   (cake2::app-build)
   (let ((filename (buffer-file-name)))
     (unless (not (string-match cake2::controller-testcase-regexp filename))
@@ -471,12 +492,12 @@
       (cake2::inflect-name filename cake2::current-file-type))))
 
 (defun cake2::fixture-file? ()
-  "Check whether current file is fixture file."
+  "Check whether current file is Fixture file."
   (cake2::app-build)
   (let ((filename (buffer-file-name)))
-  (unless (not (string-match cake2::fixture-regexp filename))
-    (setq cake2::current-file-type 'fixture)
-    (cake2::inflect-name filename cake2::current-file-type))))
+    (unless (not (string-match cake2::fixture-regexp filename))
+      (setq cake2::current-file-type 'fixture)
+      (cake2::inflect-name filename cake2::current-file-type))))
 
 (defun cake2::js-file? ()
   "Check whether current file is Js file."
@@ -484,19 +505,19 @@
   (let ((filename (buffer-file-name))
         (js-dirs (cake2::build-app-dirs "webroot/js"))
         (depth 0))
-  (unless (not (cake2::file-in-dirs? filename js-dirs depth))
-    (setq cake2::current-file-type 'js)
-    t)))
+    (unless (not (cake2::file-in-dirs? filename js-dirs depth))
+      (setq cake2::current-file-type 'js)
+      t)))
 
 (defun cake2::css-file? ()
-  "Check whether current file is Js file."
+  "Check whether current file is CSS file."
   (cake2::app-build)
   (let ((filename (buffer-file-name))
         (css-dirs (cake2::build-app-dirs "webroot/css"))
         (depth 0))
-  (unless (not (cake2::file-in-dirs? filename css-dirs depth))
-    (setq cake2::current-file-type 'css)
-    t)))
+    (unless (not (cake2::file-in-dirs? filename css-dirs depth))
+      (setq cake2::current-file-type 'css)
+      t)))
 
 (defun cake2::file? ()
   "Check whether current file is CakePHP2's file."
@@ -560,26 +581,7 @@
   "Set CakePHP App::build() pathes."
   (unless cake2::app-path
     (error "%s" "Can't find CakePHP project app path."))
-  (let ((build-pathes (ht
-                       ((f-filename "Model") (list "Model" "Lib/Model"))
-                       ((f-filename "Model/Behavior") (list "Model/Behavior"))
-                       ((f-filename "Model/Datasource") (list "Model/Datasource"))
-                       ((f-filename "Model/Datasource/Database") (list "Model/Datasource/Database"))
-                       ((f-filename "Model/Datasource/Session") (list "Model/Datasource/Session"))
-                       ((f-filename "Controller") (list "Controller" "Lib/Controller"))
-                       ((f-filename "Controller/Component") (list "Controller/Component"))
-                       ((f-filename "Controller/Component/Auth") (list "Controller/Component/Auth"))
-                       ((f-filename "Controller/Component/Acl") (list "Controller/Component/Acl"))
-                       ((f-filename "View") (list "View" "Lib/View"))
-                       ((f-filename "View/Helper") (list "View/Helper"))
-                       ((f-filename "Console") (list "Console"))
-                       ((f-filename "Console/Command") (list "Console/Command"))
-                       ((f-filename "Console/Command/Task") (list "Console/Command/Task"))
-                       ((f-filename "Lib") (list "Lib"))
-                       ((f-filename "Locale") (list "Locale"))
-                       ((f-filename "Vendor") (list "Vendor"))
-                       ((f-filename "Plugin") (list "Plugin"))
-                       ))
+  (let ((build-pathes cake2::default-build-pathes)
         (dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
     (setq cake2::build-pathes build-pathes)
     ;; build
@@ -875,13 +877,12 @@
 (defun cake2::build-dirs (key &optional extra-dirs)
   "Build KEY directories list."
   (let* ((dirs (ht-get cake2::build-pathes key)))
-    (setq dirs (-filter (lambda (dir) (f-dir? (f-expand dir cake2::app-path)))
-                        (-union
-                         dirs
-                         (-map (lambda (dir) (if dir
-                                                 (f-join dir key)
-                                               nil)) extra-dirs))))
-    dirs))
+    (-filter (lambda (dir) (f-dir? (f-expand dir cake2::app-path)))
+             (-union
+              dirs
+              (-map (lambda (dir) (if dir
+                                      (f-join dir key)
+                                    nil)) extra-dirs)))))
 
 (defun cake2::open-model-dirs ()
   "Open model directries. Model/ and Plugin/**/Model/"
