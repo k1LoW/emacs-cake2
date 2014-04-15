@@ -1,9 +1,9 @@
 language: emacs-lisp
 env:
-  - EMACS=emacs-23.4-bin
-  - EMACS=emacs-24.1-bin
-  - EMACS=emacs-24.2-bin
-  - EMACS=emacs-24.3-bin
+  - ENV_EMACS=emacs-23.4-bin
+  - ENV_EMACS=emacs-24.1-bin
+  - ENV_EMACS=emacs-24.2-bin
+  - ENV_EMACS=emacs-24.3-bin
 before_install:
   # Emacs
   - sudo mkdir /usr/local/evm
@@ -15,7 +15,7 @@ before_install:
   - curl -fsSkL --max-time 10 --retry 10 --retry-delay 10
         https://raw.github.com/cask/cask/master/go | python
   - export PATH="$HOME/.cask/bin:$PATH"
-  - evm install $EMACS --use
+  - evm install $ENV_EMACS --use
   - cask
 script:
   - emacs --version
