@@ -1555,6 +1555,9 @@
         (find-file (f-expand "app/Model/Post.php" cake2::test-dir))
         (cake2::model-file?))
       (expect t
+        (find-file (f-expand "app/View/Posts/add.ctp" cake2::test-dir))
+        (cake2::view-file?))
+      (expect t
         (find-file (f-expand "app/Controller/PostsController.php" cake2::test-dir))
         (cake2::controller-file?))
       (expect t
@@ -1693,7 +1696,7 @@
                                 t
                               nil)) (cake2::build-view-focused-dirs "Elements")))
       (expect t
-        (cake2::file-in-dirs? (f-join cake2::app-path "View/Posts/foo.ctp") (cake2::build-view-focused-dirs "Posts")))
+        (cake2::file-in-dirs? (f-join cake2::app-path "View/Posts/not_exists_file_but_cake_file.ctp") (cake2::build-view-focused-dirs "Posts")))
       )))
 
 (provide 'cake2)
