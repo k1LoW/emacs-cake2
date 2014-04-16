@@ -108,14 +108,10 @@
 ;;    Open test directories.
 ;;  `cake2::set-version'
 ;;    Set CakePHP2 version.
-;;  `cake2::complete'
-;;    Insert CakePHP2 code.
 ;;  `cake2::tail-log'
 ;;    Show log by "tail".
 ;;  `anything-c-cake2-anything-only-source-cake2'
 ;;    Anything only anything-c-source-cake2 and anything-c-source-cake2-model-function.
-;;  `anything-c-cake2-anything-only-function'
-;;    Anything only anything-c-source-cake2-function.
 ;;  `anything-c-cake2-anything-only-model-function'
 ;;    Anything only anything-c-source-cake2-model-function.
 ;;  `anything-c-cake2-anything-only-po'
@@ -154,10 +150,6 @@
 (require 'anything)
 (require 'historyf)
 (require 'easy-mmode)
-
-(when (require 'anything-show-completion nil t)
-  (use-anything-show-completion 'cake2::complete
-                                '(length cake2::initial-input)))
 
 (defgroup cake2 nil
   "CakePHP2 minor mode"
@@ -1117,31 +1109,35 @@
                                                  (skip-syntax-backward "w_")
                                                  (point))))))
 
-(defun cake2::complete ()
-  "Insert CakePHP2 code."
-  (interactive)
-  (if (cake2::app-build)
-      (cond
-       ((cake2::controller-file?)
-        (anything
-         '(cake2::source-layouts
-           cake2::source-models)
-         (cake2::get-initial-input) "Find Code: " nil))
-       ((cake2::view-file?)
-        (anything
-         '(cake2::source-js
-           cake2::source-css
-           cake2::source-elements)
-         (cake2::get-initial-input) "Find Code: " nil))
-       (t
-        (anything
-         '(cake2::source-js
-           cake2::source-css
-           cake2::source-elements
-           cake2::source-layouts
-           cake2::source-models)
-         (cake2::get-initial-input) "Find Code: " nil))
-       )))
+(when (require 'anything-show-completion nil t)
+  (use-anything-show-completion 'cake2::complete
+                                '(length cake2::initial-input)))
+(unless (functionp 'cake2::complete)
+  (defun cake2::complete ()
+    "Insert CakePHP2 code."
+    (interactive)
+    (if (cake2::app-build)
+        (cond
+         ((cake2::controller-file?)
+          (anything
+           '(cake2::source-layouts
+             cake2::source-models)
+           (cake2::get-initial-input) "Find Code: " nil))
+         ((cake2::view-file?)
+          (anything
+           '(cake2::source-js
+             cake2::source-css
+             cake2::source-elements)
+           (cake2::get-initial-input) "Find Code: " nil))
+         (t
+          (anything
+           '(cake2::source-js
+             cake2::source-css
+             cake2::source-elements
+             cake2::source-layouts
+             cake2::source-models)
+           (cake2::get-initial-input) "Find Code: " nil))
+         ))))
 
 (defun cake2::logs ()
   "Set logs list."
@@ -1171,10 +1167,6 @@
         (message "Can't set log.")))))
 
 ;;; anything sources and functions
-
-(when (require 'anything-show-completion nil t)
-  (use-anything-show-completion 'anything-c-cake2-anything-only-function
-                                '(length cake2::initial-input)))
 
 (defvar cake2::candidate-function-name nil)
 
@@ -1500,13 +1492,17 @@
                   anything-c-source-cake2-behavior-function)
             nil "Find CakePHP2 Sources: " nil nil))
 
-(defun anything-c-cake2-anything-only-function ()
-  "Anything only anything-c-source-cake2-function."
-  (interactive)
-  (let* ((initial-pattern (regexp-quote (or (thing-at-point 'symbol) ""))))
-    (anything (list anything-c-source-cake2-model-function
-                    anything-c-source-cake2-component-function
-                    anything-c-source-cake2-behavior-function) initial-pattern "Find Cake2 Functions: " nil)))
+(when (require 'anything-show-completion nil t)
+  (use-anything-show-completion 'anything-c-cake2-anything-only-function
+                                '(length cake2::initial-input)))
+(unless (functionp 'anything-c-cake2-anything-only-function)
+  (defun anything-c-cake2-anything-only-function ()
+    "Anything only anything-c-source-cake2-function."
+    (interactive)
+    (let* ((initial-pattern (regexp-quote (or (thing-at-point 'symbol) ""))))
+      (anything (list anything-c-source-cake2-model-function
+                      anything-c-source-cake2-component-function
+                      anything-c-source-cake2-behavior-function) initial-pattern "Find Cake2 Functions: " nil))))
 
 (defun anything-c-cake2-anything-only-model-function ()
   "Anything only anything-c-source-cake2-model-function."
@@ -1549,11 +1545,11 @@
       (expect t
         (global-cake2 t)
         t)
+      (expect t
+        (functionp 'cake2::complete))
       (desc "----- inflect test")
       (expect "Lib/Admin/App"
         (cake-singularize "Lib/Admin/App"))
-      (expect "Lib/Admin/Post"
-        (cake-singularize "Lib/Admin/Posts"))
       (desc "----- file type test")
       (expect t
         (find-file (f-expand "app/Model/Post.php" cake2::test-dir))
