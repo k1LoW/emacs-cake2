@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.1
+;; Version: 2.0.2
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -255,6 +255,9 @@
                                      ((f-filename "Plugin") (list "Plugin")))
   "CakePHP2 default build pathes.")
 
+(defvar cake2::build-pathes nil
+  "CakePHP2 build pathes.")
+
 (defvar cake2::model-regexp "^.+/Model/\\([^/]+\\)\.php$"
   "Model file regExp.")
 
@@ -350,7 +353,7 @@
       ('model
        (unless (not (string-match cake2::model-regexp filename))
          (setq name (match-string 1 filename))
-         (setq cake2-singular-name (cake-singularize name))
+         (setq cake2::singular-name (cake-singularize name))
          (setq cake2::singular-name (cake-singularize name))
          (setq cake2::plural-name (cake-pluralize name))
          (setq cake2::camelize-name (cake-camelize name))))
@@ -794,7 +797,7 @@
                     ((y-or-n-p "Make new file? ")
                      (find-file (f-join cake2::app-path "webroot/css" (concat css-name ".css"))))
                     (message (format "Can't find %s" (f-join cake2::app-path "webroot/css" (concat css-name ".css"))))))
-          (message "Can't find stylesheet  name."))
+          (message "Can't find stylesheet name."))
       (message "Can't set app path."))))
 
 (defun cake2::switch ()
