@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.0
+;; Version: 2.0.1
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -202,7 +202,7 @@
       (cake2 1)
     nil))
 
-;; key-map
+;;;###autoload
 (defvar cake2::key-map
   (make-sparse-keymap)
   "Keymap for Cake2.")
@@ -343,7 +343,7 @@
                                     (setq filepath (f-dirname filepath))))))
     (--any? (f-descendant-of? filepath (f-expand it cake2::app-path)) dirs)))
 
-(defun cake2::inflect-name (finename &optional file-type)
+(defun cake2::inflect-name (filename &optional file-type)
   "Inflect NAME"
   (let ((name nil))
     (case file-type
