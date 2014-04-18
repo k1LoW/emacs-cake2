@@ -14,6 +14,7 @@
 (require 'cake)
 (require 'cake2)
 
+;;;###autoload
 (defun cake-auto-switch ()
   (interactive)
   (let ((cake-major-version (car (cake-version))))
@@ -21,35 +22,35 @@
      ((eq cake-major-version 1)
       (cake))
      ((eq cake-major-version 2)
-      (cake2)))))
+      (cake2))
+     (t
+      (cake2::maybe))
+     )))
 
 (defun cake-version ()
   (let ((version-file (cake-version-file)))
     (if version-file
-	(with-temp-buffer
-	  (insert-file-contents version-file)
-	  (when (re-search-forward
-		 "^\\([0-9]\\)\\.\\([0-9]\\)\\.\\([0-9]\\)" (point-max) t)
-	    (mapcar
-	     (lambda (n) (string-to-number (match-string n)))
-	     (list 1 2 3)))))))
+        (with-temp-buffer
+          (insert-file-contents version-file)
+          (when (re-search-forward
+                 "^\\([0-9]\\)\\.\\([0-9]\\)\\.\\([0-9]\\)" (point-max) t)
+            (mapcar
+             (lambda (n) (string-to-number (match-string n)))
+             (list 1 2 3)))))))
 
 (defun cake-version-file ()
-  (let ((dir (file-name-directory (buffer-file-name)))
-	version-file)
+  (let ((dir (f-dirname (buffer-file-name)))
+        version-file)
     (catch 'break
-      (while dir
-	(dolist (txt (list "lib/Cake/VERSION.txt"
-			   "cake/VERSION.txt"))
-	  (setq version-file (expand-file-name txt dir))
-	  (if (file-exists-p version-file)
-	      (throw 'break nil)
-	    (setq version-file nil)))
-	(setq dir (file-name-directory
-		   (or (and (string-match "\\(.+\\)/$" dir)
-			    (match-string 1 dir))
-		       "")))))
-    version-file))
+      (while (not (f-root? dir))
+        (dolist (txt (list "lib/Cake/VERSION.txt"
+                           "cake/VERSION.txt"))
+          (setq version-file (f-expand txt dir))
+          (if (f-exists? version-file)
+              (throw 'break nil)
+            (setq version-file nil)))
+        (setq dir (f-dirname dir)))
+    version-file)))
 
 (provide 'cake-auto-switch)
 ;;; cake-auto-switch.el ends here
