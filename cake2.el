@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.2
+;; Version: 2.0.3
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -300,9 +300,11 @@
 (defvar cake2::file-history nil
   "Switch file history.")
 
+(defalias 'cake2-hook 'cake2::hook)
 (defvar cake2::hook nil
   "Hook.")
 
+(defalias 'cake2-set-default-keymap 'cake2::set-default-keymap)
 (defun cake2::set-default-keymap ()
   "Set default key-map."
   (setq cake2::key-map
@@ -1173,7 +1175,7 @@
 
 (defvar cake2::candidate-function-name nil)
 
-(defvar anything-c-cake2::po-file-buffer-name "*Cake2 Po*")
+(defvar anything-c-cake2-po-file-buffer-name "*Cake2 Po*")
 
 (defun cake2::build-source-cake2()
   "Build for anything-c-source-cake2"
@@ -1200,16 +1202,16 @@
          (with-current-buffer (anything-candidate-buffer 'local)
            (cake2::build-source-cake2))))
     (candidates-in-buffer)
-    (display-to-real . anything-c-cake2::set-names)
+    (display-to-real . anything-c-cake2-set-names)
     (action
      ("Switch to Contoroller" . (lambda (candidate)
-                                  (anything-c-cake2::switch-to-controller)))
+                                  (anything-c-cake2-switch-to-controller)))
      ("Switch to View" . (lambda (candidate)
-                           (anything-c-cake2::switch-to-view)))
+                           (anything-c-cake2-switch-to-view)))
      ("Switch to Model" . (lambda (candidate)
-                            (anything-c-cake2::switch-to-model))))))
+                            (anything-c-cake2-switch-to-model))))))
 
-(defun anything-c-cake2::set-names (candidate)
+(defun anything-c-cake2-set-names (candidate)
   "Set names by display-to-real"
   (string-match "\\(.+\\) / \\(.+\\)" candidate)
   (setq cake2::plural-name (match-string 1 candidate))
@@ -1219,7 +1221,7 @@
   (setq cake2::lower-camelized-action-name cake2::action-name)
   (setq cake2::snake-action-name (cake-snake cake2::action-name)))
 
-(defun anything-c-cake2::switch-to-view ()
+(defun anything-c-cake2-switch-to-view ()
   "Switch to view."
   (let ((themed-dir "")
         (plural-name cake2::plural-name)
@@ -1256,7 +1258,7 @@
         (find-file (f-join cake2::app-path "View" plural-name (concat action-name "." cake2::view-extension))))
        (t (message (format "Can't find %s" (f-join cake2::app-path "View" plural-name (concat action-name "." cake2::view-extension)))))))))
 
-(defun anything-c-cake2::switch-to-controller ()
+(defun anything-c-cake2-switch-to-controller ()
   "Switch to contoroller."
   (cake2::app-build)
   (if (f-exists? (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
@@ -1279,7 +1281,7 @@
           (find-file (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php")))
         (message (format "Can't find %s" (f-join cake2::app-path "Controller" (concat cake2::plural-name "Controller.php"))))))))
 
-(defun anything-c-cake2::switch-to-model ()
+(defun anything-c-cake2-switch-to-model ()
   "Switch to model."
   (cake2::app-build)
   (unless (cake2::find-file-if-exists (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
@@ -1288,7 +1290,7 @@
           (find-file (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php")))
         (message (format "Can't find %s" (f-join cake2::app-path "Model" (concat cake2::camelize-name ".php"))))))))
 
-(defun anything-c-cake2::switch-to-file-function (dir)
+(defun anything-c-cake2-switch-to-file-function (dir)
   "Switch to file and search function."
   (cake2::app-build)
   (if (not (f-exists? (f-join cake2::app-path dir (concat cake2::camelize-name ".php"))))
@@ -1324,10 +1326,10 @@
              (call-process-shell-command nil nil (current-buffer)))
            )))
     (candidates-in-buffer)
-    (display-to-real . anything-c-cake2::set-names2)
+    (display-to-real . anything-c-cake2-set-names2)
     (action
      ("Switch to Function" . (lambda (candidate)
-                               (anything-c-cake2::switch-to-file-function "Model/")))
+                               (anything-c-cake2-switch-to-file-function "Model/")))
      ("Insert" . (lambda (candidate)
                    (insert candidate))))))
 
@@ -1356,10 +1358,10 @@
              (call-process-shell-command nil nil (current-buffer)))
            )))
     (candidates-in-buffer)
-    (display-to-real . anything-c-cake2::set-names2)
+    (display-to-real . anything-c-cake2-set-names2)
     (action
      ("Switch to Function" . (lambda (candidate)
-                               (anything-c-cake2::switch-to-file-function "Controller/Component/")))
+                               (anything-c-cake2-switch-to-file-function "Controller/Component/")))
      ("Insert" . (lambda (candidate)
                    (insert candidate))))))
 
@@ -1388,14 +1390,14 @@
              (call-process-shell-command nil nil (current-buffer)))
            )))
     (candidates-in-buffer)
-    (display-to-real . anything-c-cake2::set-names2)
+    (display-to-real . anything-c-cake2-set-names2)
     (action
      ("Switch to Function" . (lambda (candidate)
-                               (anything-c-cake2::switch-to-file-function "Model/Behavior/")))
+                               (anything-c-cake2-switch-to-file-function "Model/Behavior/")))
      ("Insert" . (lambda (candidate)
                    (insert candidate))))))
 
-(defun anything-c-cake2::set-names2 (candidate)
+(defun anything-c-cake2-set-names2 (candidate)
   "Set names by display-to-real"
   (string-match "\\(.+\\)->\\(.+\\)" candidate)
   (setq cake2::camelized-singular-name (match-string 1 candidate))
@@ -1404,24 +1406,24 @@
   (setq cake2::singular-name (cake-snake cake2::camelized-singular-name))
   candidate)
 
-(defun anything-c-cake2::create-po-file-buffer ()
+(defun anything-c-cake2-create-po-file-buffer ()
   "Create buffer from po file."
   (let ((anything-buffer (anything-candidate-buffer 'global)))
     (catch 'invalid-po-file
-      (unless (anything-c-cake2::generate-po-file-buffer (f-join cake2::app-path "Locale" cake2::po-file-path))
+      (unless (anything-c-cake2-generate-po-file-buffer (f-join cake2::app-path "Locale" cake2::po-file-path))
         (message "Can't find po file: %s" (f-join cake2::app-path "Locale" cake2::po-file-path))
         (throw 'invalid-po-file nil))
       (with-current-buffer anything-buffer
         (set-syntax-table (with-current-buffer anything-current-buffer
                             (syntax-table)))
-        (insert-buffer-substring anything-c-cake2::po-file-buffer-name)))))
+        (insert-buffer-substring anything-c-cake2-po-file-buffer-name)))))
 
-(defun anything-c-cake2::generate-po-file-buffer (po-file)
+(defun anything-c-cake2-generate-po-file-buffer (po-file)
   "Generate po file buffer"
   (when (and po-file
              (file-exists-p po-file)
              (file-regular-p po-file))
-    (with-current-buffer (get-buffer-create anything-c-cake2::po-file-buffer-name)
+    (with-current-buffer (get-buffer-create anything-c-cake2-po-file-buffer-name)
 
       (erase-buffer)
       (insert-file-contents po-file)
@@ -1441,21 +1443,21 @@
     (init . (lambda ()
               (cake2::app-build)
               (setq path cake2::app-path)
-              (anything-c-cake2::create-po-file-buffer)))
+              (anything-c-cake2-create-po-file-buffer)))
     (candidates-in-buffer)
     (action
      ("Insert __('msgid')." . (lambda (candidate)
-                                (insert (concat "__('" (anything-c-cake2::get-msgid candidate) "')"))))
+                                (insert (concat "__('" (anything-c-cake2-get-msgid candidate) "')"))))
      ("Insert __('msgid',true)." . (lambda (candidate)
-                                     (insert (concat "__('" (anything-c-cake2::get-msgid candidate) "',true)"))))
+                                     (insert (concat "__('" (anything-c-cake2-get-msgid candidate) "',true)"))))
      ("Insert msgid." . (lambda (candidate)
-                          (insert (anything-c-cake2::get-msgid candidate))))
+                          (insert (anything-c-cake2-get-msgid candidate))))
      ("Insert msgstr." . (lambda (candidate)
-                           (insert (anything-c-cake2::get-msgstr candidate))))
+                           (insert (anything-c-cake2-get-msgstr candidate))))
      ("Goto po file" . (lambda (candidate)
                          (find-file (concat path "/Locale/" cake2::po-file-path))
                          (goto-char (point-min))
-                         (re-search-forward (concat "\"" (anything-c-cake2::get-msgid candidate) "\"") nil t))))))
+                         (re-search-forward (concat "\"" (anything-c-cake2-get-msgid candidate) "\"") nil t))))))
 
 (defvar anything-c-source-cake2-po-not-found
   '((name . "Create __()")
@@ -1474,13 +1476,13 @@
                          (find-file (f-join path "Locale" cake2::po-file-path))
                          (goto-char (point-max)))))))
 
-(defun anything-c-cake2::get-msgid (candidate)
+(defun anything-c-cake2-get-msgid (candidate)
   "Set msgid"
   (progn
     (string-match "\\(.+\\) /" candidate)
     (match-string 1 candidate)))
 
-(defun anything-c-cake2::get-msgstr (candidate)
+(defun anything-c-cake2-get-msgstr (candidate)
   "Set msgstr"
   (progn
     (string-match "/ \\(.+\\)$" candidate)
@@ -1616,16 +1618,16 @@
           (cake2::build-source-cake2)
           (integerp (string-match "Lib/Controller/Admin/AdminApp / beforeFilter" (buffer-string)))))
       (expect "Posts"
-        (anything-c-cake2::set-names "Posts / add")
+        (anything-c-cake2-set-names "Posts / add")
         cake2::plural-name)
       (expect "Admin/AdminPosts"
-        (anything-c-cake2::set-names "Admin/AdminPosts / index")
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
         cake2::plural-name)
       (expect "index"
-        (anything-c-cake2::set-names "Admin/AdminPosts / index")
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
         cake2::action-name)
       (expect "Admin/AdminPost"
-        (anything-c-cake2::set-names "Admin/AdminPosts / index")
+        (anything-c-cake2-set-names "Admin/AdminPosts / index")
         cake2::singular-name)
       (expect t
         (find-file (f-expand "app/Controller/NoActionController.php" cake2::test-dir))
