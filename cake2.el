@@ -234,6 +234,8 @@
 (defvar cake2::themed-name nil
   "CakePHP2 current view themed name.")
 
+(defvar cake2::cake-core-include-path "../lib/")
+
 (defvar cake2::default-build-pathes (ht
                                      ((f-filename "Model") (list "Model" "Lib/Model"))
                                      ((f-filename "Model/Behavior") (list "Model/Behavior"))
@@ -542,6 +544,7 @@
   (if (not cake2::app-path)
       nil
     (cake2::set-build-pathes)
+    (cake2::set-cake-core-include-path)
     t))
 
 (defun cake2::find-app-path ()
@@ -573,6 +576,15 @@
   (let ((formatted-key (cake-camelize (cake-singularize (symbol-name key)))))
     (ht-set! cake2::build-pathes formatted-key
              (-union (ht-get cake2::build-pathes formatted-key) (coerce pathes 'list)))))
+
+(defun cake2::set-cake-core-include-path ()
+  "Set CakePHP CAKE_CORE_INCLUDE_PATH"
+  (unless cake2::app-path
+    (error "%s" "Can't find CakePHP project app path."))
+  (let ((dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
+    (unless (not (and (cake2::read-dot-cake)
+                      (stringp (ht-get dot-cake-hash 'cake))))
+      (setq cake2::cake-core-include-path (f-expand (ht-get dot-cake-hash 'cake) cake2::app-path)))))
 
 (defun cake2::set-build-pathes ()
   "Set CakePHP App::build() pathes."
@@ -873,7 +885,7 @@
 
 (defun cake2::build-dirs (key &optional extra-dirs)
   "Build KEY directories list."
-  (let* ((dirs (ht-get cake2::build-pathes key)))
+  (let* ((dirs (ht-get cake2::build-pathes (f-filename key))))
     (-filter (lambda (dir) (f-dir? (f-expand dir cake2::app-path)))
              (-union
               dirs
@@ -924,21 +936,21 @@
   (interactive)
   (let ((recursive t)
         (ignore nil))
-    (cake2::open-dirs (cake2::build-dirs "Behavior" (cake2::find-plugin-dirs)) recursive ignore)))
+    (cake2::open-dirs (cake2::build-dirs "Model/Behavior" (cake2::find-plugin-dirs)) recursive ignore)))
 
 (defun cake2::open-helper-dirs ()
   "Open helper directories."
   (interactive)
   (let ((recursive t)
         (ignore nil))
-    (cake2::open-dirs (cake2::build-dirs "Helper" (cake2::find-plugin-dirs)) recursive ignore)))
+    (cake2::open-dirs (cake2::build-dirs "View/Helper" (cake2::find-plugin-dirs)) recursive ignore)))
 
 (defun cake2::open-component-dirs ()
   "Open component directories."
   (interactive)
   (let ((recursive t)
         (ignore nil))
-    (cake2::open-dirs (cake2::build-dirs "Component" (cake2::find-plugin-dirs)) recursive ignore)))
+    (cake2::open-dirs (cake2::build-dirs "Controller/Component" (cake2::find-plugin-dirs)) recursive ignore)))
 
 (defun cake2::open-lib-dirs ()
   "Open lib directories."
@@ -1552,6 +1564,13 @@
         t)
       (expect t
         (functionp 'cake2::complete))
+      (expect t
+        (find-file (f-expand "app/Controller/PostsController.php" cake2::test-dir))
+        (cake2::maybe))
+      (desc "----- core-include-path test")
+      (expect "../lib/"
+        (cake2::set-cake-core-include-path)
+        cake2::cake-core-include-path)
       (desc "----- inflect test")
       (expect "Lib/Admin/App"
         (cake-singularize "Lib/Admin/App"))
@@ -1649,12 +1668,12 @@
       (desc "----- .cake read test")
       (expect (f-expand "myapp" cake2::test-dir)
         cake2::app-path)
-      (expect "{\"cake\":\"..\\/Vendor\\/cakephp\\/cakephp\\/\", \"build_path\":{\"plugins\":[\"..\\/Plugin\\/\"]}}"
+      (expect "{\"cake\":\"..\\/Vendor\\/cakephp\\/cakephp\\/lib\\/\", \"build_path\":{\"plugins\":[\"..\\/Plugin\\/\"]}}"
         (json-encode (cake2::read-dot-cake)))
-      (expect "../Vendor/cakephp/cakephp/"
+      (expect "../Vendor/cakephp/cakephp/lib/"
         (let ((dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
           (ht-get dot-cake-hash `cake)))
-      (expect "../Vendor/cakephp/cakephp/"
+      (expect "../Vendor/cakephp/cakephp/lib/"
         (let ((dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
           (ht-get dot-cake-hash (intern-soft "cake"))))
       (expect `((plugins . ["../Plugin/"]))
@@ -1666,6 +1685,10 @@
       (expect nil
         (let ((dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
           (ht-get dot-cake-hash nil)))
+      (desc "----- core-include-path test")
+      (expect (f-expand "../Vendor/cakephp/cakephp/lib/" cake2::app-path)
+        (cake2::set-cake-core-include-path)
+        cake2::cake-core-include-path)
       (desc "----- build pathes test")
       (expect `("Plugin" "../Plugin/")
         (cake2::set-build-pathes)
@@ -1700,6 +1723,21 @@
                                      (s-matches? "Elements" dir))
                                 t
                               nil)) (cake2::build-view-focused-dirs "Elements")))
+      (expect `(t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Behavior" dir))
+                                t
+                              nil)) (cake2::build-dirs "Model/Behavior" (cake2::find-plugin-dirs))))
+      (expect `(t t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Component" dir))
+                                t
+                              nil)) (cake2::build-dirs "Controller/Component" (cake2::find-plugin-dirs))))
+      (expect `(t t t)
+        (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
+                                     (s-matches? "Helper" dir))
+                                t
+                              nil)) (cake2::build-dirs "View/Helper" (cake2::find-plugin-dirs))))
       (expect t
         (cake2::file-in-dirs? (f-join cake2::app-path "View/Posts/not_exists_file_but_cake_file.ctp") (cake2::build-view-focused-dirs "Posts")))
       )))

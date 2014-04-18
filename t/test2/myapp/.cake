@@ -4,5 +4,5 @@
       "../Plugin/"
     ]
   },
-  "cake": "../Vendor/cakephp/cakephp/"
+  "cake": "../Vendor/cakephp/cakephp/lib/"
 }
