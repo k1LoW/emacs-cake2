@@ -236,7 +236,7 @@
 
 (defvar cake2::cake-core-include-path "../lib/")
 
-(defvar cake2::default-build-pathes (ht
+(defvar cake2::default-build-paths (ht
                                      ((f-filename "Model") (list "Model" "Lib/Model"))
                                      ((f-filename "Model/Behavior") (list "Model/Behavior"))
                                      ((f-filename "Model/Datasource") (list "Model/Datasource"))
@@ -255,10 +255,10 @@
                                      ((f-filename "Locale") (list "Locale"))
                                      ((f-filename "Vendor") (list "Vendor"))
                                      ((f-filename "Plugin") (list "Plugin")))
-  "CakePHP2 default build pathes.")
+  "CakePHP2 default build paths.")
 
-(defvar cake2::build-pathes nil
-  "CakePHP2 build pathes.")
+(defvar cake2::build-paths nil
+  "CakePHP2 build paths.")
 
 (defvar cake2::model-regexp "^.+/Model/\\([^/]+\\)\.php$"
   "Model file regExp.")
@@ -543,7 +543,7 @@
   (setq cake2::app-path (cake2::find-app-path))
   (if (not cake2::app-path)
       nil
-    (cake2::set-build-pathes)
+    (cake2::set-build-paths)
     (cake2::set-cake-core-include-path)
     t))
 
@@ -569,13 +569,13 @@
   (unless (not (f-exists? (f-join cake2::app-path ".cake")))
     (json-read-file (f-join cake2::app-path ".cake"))))
 
-(defun cake2::append-to-build-pathes (key pathes)
-  "Append path to cake2::build-pathes[key]."
-  (unless cake2::build-pathes
-    (error "%s" "Can't set cake2::build-pathes"))
+(defun cake2::append-to-build-paths (key paths)
+  "Append path to cake2::build-paths[key]."
+  (unless cake2::build-paths
+    (error "%s" "Can't set cake2::build-paths"))
   (let ((formatted-key (cake-camelize (cake-singularize (symbol-name key)))))
-    (ht-set! cake2::build-pathes formatted-key
-             (-union (ht-get cake2::build-pathes formatted-key) (coerce pathes 'list)))))
+    (ht-set! cake2::build-paths formatted-key
+             (-union (ht-get cake2::build-paths formatted-key) (coerce paths 'list)))))
 
 (defun cake2::set-cake-core-include-path ()
   "Set CakePHP CAKE_CORE_INCLUDE_PATH"
@@ -586,17 +586,17 @@
                       (stringp (ht-get dot-cake-hash 'cake))))
       (setq cake2::cake-core-include-path (f-expand (ht-get dot-cake-hash 'cake) cake2::app-path)))))
 
-(defun cake2::set-build-pathes ()
-  "Set CakePHP App::build() pathes."
+(defun cake2::set-build-paths ()
+  "Set CakePHP App::build() paths."
   (unless cake2::app-path
     (error "%s" "Can't find CakePHP project app path."))
-  (let ((build-pathes cake2::default-build-pathes)
+  (let ((build-paths cake2::default-build-paths)
         (dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
-    (setq cake2::build-pathes build-pathes)
+    (setq cake2::build-paths build-paths)
     ;; build
     (unless (not (cake2::read-dot-cake))
-      (ht-each (lambda ($key $pathes)
-                 (cake2::append-to-build-pathes $key $pathes)
+      (ht-each (lambda ($key $paths)
+                 (cake2::append-to-build-paths $key $paths)
                  ) (ht<-alist (ht-get dot-cake-hash 'build_path))))))
 
 (defun cake2::switch-to-model ()
@@ -885,7 +885,7 @@
 
 (defun cake2::build-dirs (key &optional extra-dirs)
   "Build KEY directories list."
-  (let* ((dirs (ht-get cake2::build-pathes (f-filename key))))
+  (let* ((dirs (ht-get cake2::build-paths (f-filename key))))
     (-filter (lambda (dir) (f-dir? (f-expand dir cake2::app-path)))
              (-union
               dirs
@@ -1020,7 +1020,7 @@
   (-flatten (-map (lambda (dir)
                     (if (f-dir? (f-expand dir cake2::app-path))
                         (f-directories (f-expand dir cake2::app-path))
-                      nil)) (ht-get cake2::build-pathes "Plugin"))))
+                      nil)) (ht-get cake2::build-paths "Plugin"))))
 
 (defun cake2::find-themed-dirs ()
   "Find themed directory. like app/View/Themed/m"
@@ -1689,10 +1689,10 @@
       (expect (f-expand "../Vendor/cakephp/cakephp/lib/" cake2::app-path)
         (cake2::set-cake-core-include-path)
         cake2::cake-core-include-path)
-      (desc "----- build pathes test")
+      (desc "----- build paths test")
       (expect `("Plugin" "../Plugin/")
-        (cake2::set-build-pathes)
-        (ht-get cake2::build-pathes "Plugin"))
+        (cake2::set-build-paths)
+        (ht-get cake2::build-paths "Plugin"))
       (expect '(t t t)
         (-map (lambda (dir) (if (and (f-dir? (f-expand dir cake2::app-path))
                                      (s-matches? "Model" dir))
