@@ -199,7 +199,7 @@
   "What buffer `cake2' prefers."
   (if (and (not (minibufferp (current-buffer)))
            (cake2::file?))
-      (cake2)
+      (cake2 1)
     nil))
 
 ;;;###autoload
