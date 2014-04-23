@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.4
+;; Version: 2.0.5
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -198,8 +198,8 @@
 (defun cake2::maybe ()
   "What buffer `cake2' prefers."
   (if (and (not (minibufferp (current-buffer)))
-           (cake2::app-build))
-      (cake2 1)
+           (cake2::file?))
+      (cake2)
     nil))
 
 ;;;###autoload
@@ -237,27 +237,27 @@
 (defvar cake2::cake-core-include-path "../lib/")
 
 (defvar cake2::default-build-paths (ht
-                                     ((f-filename "Model") (list "Model" "Lib/Model"))
-                                     ((f-filename "Model/Behavior") (list "Model/Behavior"))
-                                     ((f-filename "Model/Datasource") (list "Model/Datasource"))
-                                     ((f-filename "Model/Datasource/Database") (list "Model/Datasource/Database"))
-                                     ((f-filename "Model/Datasource/Session") (list "Model/Datasource/Session"))
-                                     ((f-filename "Controller") (list "Controller" "Lib/Controller"))
-                                     ((f-filename "Controller/Component") (list "Controller/Component"))
-                                     ((f-filename "Controller/Component/Auth") (list "Controller/Component/Auth"))
-                                     ((f-filename "Controller/Component/Acl") (list "Controller/Component/Acl"))
-                                     ((f-filename "View") (list "View" "Lib/View"))
-                                     ((f-filename "View/Helper") (list "View/Helper"))
-                                     ((f-filename "Console") (list "Console"))
-                                     ((f-filename "Console/Command") (list "Console/Command"))
-                                     ((f-filename "Console/Command/Task") (list "Console/Command/Task"))
-                                     ((f-filename "Lib") (list "Lib"))
-                                     ((f-filename "Locale") (list "Locale"))
-                                     ((f-filename "Vendor") (list "Vendor"))
-                                     ((f-filename "Plugin") (list "Plugin")))
+                                    ((f-filename "Model") (list "Model" "Lib/Model"))
+                                    ((f-filename "Model/Behavior") (list "Model/Behavior"))
+                                    ((f-filename "Model/Datasource") (list "Model/Datasource"))
+                                    ((f-filename "Model/Datasource/Database") (list "Model/Datasource/Database"))
+                                    ((f-filename "Model/Datasource/Session") (list "Model/Datasource/Session"))
+                                    ((f-filename "Controller") (list "Controller" "Lib/Controller"))
+                                    ((f-filename "Controller/Component") (list "Controller/Component"))
+                                    ((f-filename "Controller/Component/Auth") (list "Controller/Component/Auth"))
+                                    ((f-filename "Controller/Component/Acl") (list "Controller/Component/Acl"))
+                                    ((f-filename "View") (list "View" "Lib/View"))
+                                    ((f-filename "View/Helper") (list "View/Helper"))
+                                    ((f-filename "Console") (list "Console"))
+                                    ((f-filename "Console/Command") (list "Console/Command"))
+                                    ((f-filename "Console/Command/Task") (list "Console/Command/Task"))
+                                    ((f-filename "Lib") (list "Lib"))
+                                    ((f-filename "Locale") (list "Locale"))
+                                    ((f-filename "Vendor") (list "Vendor"))
+                                    ((f-filename "Plugin") (list "Plugin")))
   "CakePHP2 default build paths.")
 
-(defvar cake2::build-paths nil
+(defvar cake2::build-paths cake2::default-build-paths
   "CakePHP2 build paths.")
 
 (defvar cake2::model-regexp "^.+/Model/\\([^/]+\\)\.php$"
@@ -416,132 +416,163 @@
       )
     t))
 
+(defun cake2::in-app-file? ()
+  "Check whether current file is app/* file."
+  (unless (not (cake2::update-app-path))
+    (let ((filename (buffer-file-name)))
+      (unless (not filename)
+        (if (f-descendant-of? filename cake2::app-path)
+            t
+          nil)))))
+
 (defun cake2::model-file? ()
   "Check whether current file is Model file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (model-dirs (cake2::build-dirs "Model" (cake2::find-plugin-dirs)))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename model-dirs depth))
-      (setq cake2::current-file-type 'model)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (model-dirs (cake2::build-dirs "Model" (cake2::find-plugin-dirs)))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename model-dirs depth))
+          (setq cake2::current-file-type 'model)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::view-file? ()
   "Check whether current file is View file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (view-dirs (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs))))
-        (depth 1))
-    (unless (not (cake2::file-in-dirs? filename view-dirs depth))
-      (setq cake2::themed-name nil)
-      (setq cake2::current-file-type 'view)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (view-dirs (cake2::build-dirs "View" (-union (cake2::find-themed-dirs) (cake2::find-plugin-dirs))))
+          (depth 1))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename view-dirs depth))
+          (setq cake2::themed-name nil)
+          (setq cake2::current-file-type 'view)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::controller-file? ()
   "Check whether current file is Contoroller file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (controller-dirs (cake2::build-dirs "Controller" (cake2::find-plugin-dirs)))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename controller-dirs depth))
-      (setq cake2::current-file-type 'controller)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (controller-dirs (cake2::build-dirs "Controller" (cake2::find-plugin-dirs)))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename controller-dirs depth))
+          (setq cake2::current-file-type 'controller)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::behavior-file? ()
   "Check whether current file is Behavior file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (behavior-dirs (cake2::build-dirs "Behavior" (cake2::find-plugin-dirs)))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename behavior-dirs depth))
-      (setq cake2::current-file-type 'behavior))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (behavior-dirs (cake2::build-dirs "Behavior" (cake2::find-plugin-dirs)))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename behavior-dirs depth))
+          (setq cake2::current-file-type 'behavior))))))
 
 (defun cake2::helper-file? ()
   "Check whether current file is Helper file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (helper-dirs (cake2::build-dirs "Helper" (cake2::find-plugin-dirs)))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename helper-dirs depth))
-      (setq cake2::current-file-type 'helper))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (helper-dirs (cake2::build-dirs "Helper" (cake2::find-plugin-dirs)))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename helper-dirs depth))
+          (setq cake2::current-file-type 'helper))))))
 
 (defun cake2::component-file? ()
   "Check whether current file is Component file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (component-dirs (cake2::build-dirs "Component" (cake2::find-plugin-dirs)))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename component-dirs depth))
-      (setq cake2::current-file-type 'component))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (component-dirs (cake2::build-dirs "Component" (cake2::find-plugin-dirs)))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename component-dirs depth))
+          (setq cake2::current-file-type 'component))))))
 
 (defun cake2::model-testcase-file? ()
   "Check whether current file is Model testcase file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name)))
-    (unless (not (string-match cake2::model-testcase-regexp filename))
-      (setq cake2::current-file-type 'model-testcase)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name)))
+      (unless (not filename)
+        (unless (not (string-match cake2::model-testcase-regexp filename))
+          (setq cake2::current-file-type 'model-testcase)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::controller-testcase-file? ()
   "Check whether current file is Controller testcase file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name)))
-    (unless (not (string-match cake2::controller-testcase-regexp filename))
-      (setq cake2::current-file-type 'controller-testcase)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name)))
+      (unless (not filename)
+        (unless (not (string-match cake2::controller-testcase-regexp filename))
+          (setq cake2::current-file-type 'controller-testcase)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::fixture-file? ()
   "Check whether current file is Fixture file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name)))
-    (unless (not (string-match cake2::fixture-regexp filename))
-      (setq cake2::current-file-type 'fixture)
-      (cake2::inflect-name filename cake2::current-file-type))))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name)))
+      (unless (not filename)
+        (unless (not (string-match cake2::fixture-regexp filename))
+          (setq cake2::current-file-type 'fixture)
+          (cake2::inflect-name filename cake2::current-file-type))))))
 
 (defun cake2::js-file? ()
   "Check whether current file is Js file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (js-dirs (cake2::build-app-dirs "webroot/js"))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename js-dirs depth))
-      (setq cake2::current-file-type 'js)
-      t)))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (js-dirs (cake2::build-app-dirs "webroot/js"))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename js-dirs depth))
+          (setq cake2::current-file-type 'js)
+          t)))))
 
 (defun cake2::css-file? ()
   "Check whether current file is CSS file."
-  (cake2::app-build)
-  (let ((filename (buffer-file-name))
-        (css-dirs (cake2::build-app-dirs "webroot/css"))
-        (depth 0))
-    (unless (not (cake2::file-in-dirs? filename css-dirs depth))
-      (setq cake2::current-file-type 'css)
-      t)))
+  (unless (not (cake2::app-build))
+    (let ((filename (buffer-file-name))
+          (css-dirs (cake2::build-app-dirs "webroot/css"))
+          (depth 0))
+      (unless (not filename)
+        (unless (not (cake2::file-in-dirs? filename css-dirs depth))
+          (setq cake2::current-file-type 'css)
+          t)))))
 
 (defun cake2::file? ()
   "Check whether current file is CakePHP2's file."
-  (if (or (cake2::model-file?)
-          (cake2::controller-file?)
-          (cake2::view-file?)
-          (cake2::behavior-file?)
-          (cake2::helper-file?)
-          (cake2::component-file?)
-          (cake2::js-file?)
-          (cake2::css-file?)
-          (cake2::model-testcase-file?)
-          (cake2::controller-testcase-file?)
-          (cake2::fixture-file?))
-      t nil))
+  (if (or
+       (cake2::model-file?)
+       (cake2::controller-file?)
+       (cake2::view-file?)
+       (cake2::behavior-file?)
+       (cake2::helper-file?)
+       (cake2::component-file?)
+       (cake2::js-file?)
+       (cake2::css-file?)
+       (cake2::model-testcase-file?)
+       (cake2::controller-testcase-file?)
+       (cake2::fixture-file?)
+       (cake2::in-app-file?))
+      t
+    nil))
 
 (defun cake2::get-current-line ()
   "Get current line."
   (thing-at-point 'line))
 
+(defun cake2::update-app-path ()
+  "Update cake2::app-path"
+  (let ((app-path (cake2::find-app-path)))
+    (unless (not app-path)
+      (setq cake2::app-path app-path))
+    (if cake2::app-path
+        t
+      nil)))
+
 (defalias 'cake2-set-app-path 'cake2::app-build)
 (defun cake2::app-build ()
   "Set cake2::app-path"
-  (setq cake2::app-path (cake2::find-app-path))
-  (if (not cake2::app-path)
+  (if (not (cake2::update-app-path))
       nil
     (cake2::set-build-paths)
     (cake2::set-cake-core-include-path)
@@ -564,10 +595,9 @@
 
 (defun cake2::read-dot-cake ()
   "Find .cake"
-  (unless cake2::app-path
-    (error "%s" "Can't find CakePHP project app path."))
-  (unless (not (f-exists? (f-join cake2::app-path ".cake")))
-    (json-read-file (f-join cake2::app-path ".cake"))))
+  (unless (not (cake2::update-app-path))
+    (unless (not (f-exists? (f-join cake2::app-path ".cake")))
+      (json-read-file (f-join cake2::app-path ".cake")))))
 
 (defun cake2::append-to-build-paths (key paths)
   "Append path to cake2::build-paths[key]."
@@ -579,7 +609,7 @@
 
 (defun cake2::set-cake-core-include-path ()
   "Set CakePHP CAKE_CORE_INCLUDE_PATH"
-  (unless cake2::app-path
+  (unless (cake2::update-app-path)
     (error "%s" "Can't find CakePHP project app path."))
   (let ((dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
     (unless (not (and (cake2::read-dot-cake)
@@ -588,7 +618,7 @@
 
 (defun cake2::set-build-paths ()
   "Set CakePHP App::build() paths."
-  (unless cake2::app-path
+  (unless (cake2::update-app-path)
     (error "%s" "Can't find CakePHP project app path."))
   (let ((build-paths cake2::default-build-paths)
         (dot-cake-hash (ht<-alist (cake2::read-dot-cake))))
@@ -1017,6 +1047,8 @@
 
 (defun cake2::find-plugin-dirs ()
   "Find plugin directories."
+  (unless (cake2::update-app-path)
+    (error "%s" "Can't find CakePHP project app path."))
   (-flatten (-map (lambda (dir)
                     (if (f-dir? (f-expand dir cake2::app-path))
                         (f-directories (f-expand dir cake2::app-path))
@@ -1568,6 +1600,8 @@
         (find-file (f-expand "app/Controller/PostsController.php" cake2::test-dir))
         (cake2::maybe))
       (desc "----- core-include-path test")
+      (expect (f-expand "app/" cake2::test-dir)
+        cake2::app-path)
       (expect "../lib/"
         (cake2::set-cake-core-include-path)
         cake2::cake-core-include-path)
@@ -1662,10 +1696,20 @@
       (expect t
         (global-cake2 t)
         t)
+      (desc "----- cake2::maybe test")
       (expect t
         (find-file (f-expand "myapp/Controller/PostsController.php" cake2::test-dir))
         (cake2::maybe))
+      (expect t
+        (find-file (f-expand "Plugin/Alpha/Model/AlphaAppModel.php" cake2::test-dir))
+        (cake2::maybe))
+      (expect nil
+        (find-file (f-expand "notcake/dummy.php" cake2::test-dir))
+        (cake2::maybe))
       (desc "----- .cake read test")
+      (expect t
+        (find-file (f-expand "myapp/Controller/PostsController.php" cake2::test-dir))
+        (cake2::maybe))
       (expect (f-expand "myapp" cake2::test-dir)
         cake2::app-path)
       (expect "{\"cake\":\"..\\/Vendor\\/cakephp\\/cakephp\\/lib\\/\", \"build_path\":{\"plugins\":[\"..\\/Plugin\\/\"]}}"
