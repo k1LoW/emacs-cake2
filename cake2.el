@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.5
+;; Version: 2.0.6
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -171,7 +171,7 @@
   :type 'boolean
   :group 'cake2)
 
-(defcustom cake2::core-version "2.0"
+(defcustom cake2::core-version "2.x"
   "CakePHP2 version"
   :type 'string
   :group 'cake2)
@@ -888,18 +888,18 @@
        (cake2::create-open-dirs-anything-sources dirs recursive ignore) nil)
     (message "Can't set app path.")))
 
-(defun cake2::create-open-dirs-anything-sources (dir &optional recursive ignore)
-  "Create 'Open DIR' anything-sources.  If RECURSIVE is true recursive."
+(defun cake2::create-open-dirss-anything-sources (dirs &optional recursive ignore)
+  "Create 'Open DIRS' anything-sources.  If RECURSIVE is true recursive."
   (let (sources)
-    (unless (listp dir)
-      (setq dir (list dir)))
+    (unless (listp dirs)
+      (setq dirs (list dirs)))
     (if (cake2::app-build)
         (progn
-          (loop for d in dir do
-                (unless (not (f-dir? (f-join cake2::app-path d)))
+          (loop for d in dirs do
+                (unless (not (f-dirs? (f-join cake2::app-path d)))
                   (push
-                   `((name . ,(concat "Open directory: " d))
-                     (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2::directory-files d recursive)))
+                   `((name . ,(concat "Open dirsectory: " d))
+                     (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2::dirsectory-files d recursive)))
                      (display-to-real . (lambda (candidate)
                                           (f-join ,cake2::app-path ,d candidate)))
                      (type . file))
@@ -1064,7 +1064,7 @@
 
 (defvar cake2::source-version
   '((name . "CakePHP2 core version")
-    (candidates . (lambda () (list "1.2" "1.3")))
+    (candidates . (lambda () (list "1.2" "1.3" "2.x")))
     (action
      ("Set Version" . (lambda (candidate)
                         (setq cake2::core-version candidate))))))
