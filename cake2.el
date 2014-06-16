@@ -17,7 +17,7 @@
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-;; Version: 2.0.7
+;; Version: 2.0.8
 ;; Author: k1LoW (Kenichirou Oyama), <k1lowxb [at] gmail [dot] com> <k1low [at] 101000lab [dot] org>
 ;; URL: http://code.101000lab.org
 ;; Package-Requires: ((dash "2.6.0") (s "1.9.0") (f "0.16.2") (ht "2.0") (json "1.2") (cake-inflector "1.1.0") (historyf "0.0.8") (anything "1.3.9"))
@@ -132,7 +132,7 @@
 ;;    default = nil
 ;;  `cake2::core-version'
 ;;    CakePHP2 version
-;;    default = "2.0"
+;;    default = "2.x"
 
 ;;; TODO
 ;;
@@ -896,10 +896,10 @@
     (if (cake2::app-build)
         (progn
           (loop for d in dirs do
-                (unless (not (f-dirs? (f-join cake2::app-path d)))
+                (unless (not (f-dir? (f-join cake2::app-path d)))
                   (push
-                   `((name . ,(concat "Open dirsectory: " d))
-                     (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2::dirsectory-files d recursive)))
+                   `((name . ,(concat "Open directory: " d))
+                     (candidates . ,(remove-if (lambda (x) (and ignore (string-match ignore x))) (cake2::directory-files d recursive)))
                      (display-to-real . (lambda (candidate)
                                           (f-join ,cake2::app-path ,d candidate)))
                      (type . file))
