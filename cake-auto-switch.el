@@ -33,7 +33,7 @@
         (with-temp-buffer
           (insert-file-contents version-file)
           (when (re-search-forward
-                 "^\\([0-9]\\)\\.\\([0-9]\\)\\.\\([0-9]\\)" (point-max) t)
+                 "^\\([0-9]\\)\\.\\([0-9]\\)\\.\\([0-9]+\\)" (point-max) t)
             (mapcar
              (lambda (n) (string-to-number (match-string n)))
              (list 1 2 3)))))))
@@ -47,7 +47,7 @@
                            "cake/VERSION.txt"))
           (setq version-file (f-expand txt dir))
           (if (f-exists? version-file)
-              (throw 'break nil)
+              (throw 'break version-file)
             (setq version-file nil)))
         (setq dir (f-dirname dir)))
     version-file)))
