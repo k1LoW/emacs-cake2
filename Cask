@@ -12,4 +12,5 @@
 (depends-on "json")
 (depends-on "cake-inflector")
 (depends-on "historyf")
-(depends-on "anything"))
+(depends-on "anything")
+(depends-on "el-expectations"))
